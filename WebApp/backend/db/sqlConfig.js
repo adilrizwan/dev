@@ -22,7 +22,7 @@ const pool = mssql.connect(config);
 const connectMSSQL = async () => {
   try {
     if (await pool !== undefined) {
-      console.log("Connected to SQL Server".underline.magenta);
+      console.log("Connected to Azure SQL".underline.magenta);
     }
   } catch (error) {
     console.log(error);
