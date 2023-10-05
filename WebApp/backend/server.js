@@ -6,6 +6,7 @@ const {connectMSSQL} = require("./db/sqlConfig");
 const loginRoutes = require("./routes/loginRoutes");
 const registerRoutes = require("./routes/registerRoutes");
 const lotOwnerRoutes = require("./routes/lotOwnerRoutes");
+const carOwnerRoutes = require("./routes/carOwnerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
@@ -20,6 +21,8 @@ connectMSSQL();
 app.use("/register", registerRoutes)
 app.use("/login", loginRoutes)
 app.use("/admin", adminRoutes)
+app.use("/lot", lotOwnerRoutes)
+app.use("/car", carOwnerRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server is listening on ${PORT}`.underline.yellow);
