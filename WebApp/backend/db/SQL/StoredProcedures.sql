@@ -185,7 +185,7 @@ BEGIN
   BEGIN
     -- Update the coins for the matching email
     UPDATE CarOwner
-    SET Coins = @Coins
+    SET Coins = Coins + @Coins
     WHERE Email = @Email;
 
     -- Optionally, you can return a success message or status code
@@ -197,3 +197,5 @@ BEGIN
     SELECT 0 ;
   END
 END;
+go
+select * from CarOwner
