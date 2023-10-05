@@ -16,6 +16,20 @@ exports.getProfile = async (id) => {
     res.status(400).json({ "DB ERROR": error });
   }
 };
+exports.credit = async (email, amount) => {
+  try {
+    // let pool = await mssql.connect(config);
+    let poolS = await pool;
+    let query = await poolS.request()
+    .input("Email", sql.VarChar, email)
+    .input("amount", sql.Int, amount)
+      .query(`exec CreditCoins @Email, @amount`);
+    return query.recordset[0][''];
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ "DB ERROR": error });
+  }
+};
 exports.updateProfile = async (id, post) => {
   try {
     // let pool = await mssql.connect(config);

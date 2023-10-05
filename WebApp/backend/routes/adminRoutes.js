@@ -12,5 +12,6 @@ router.post("/login", login.loginAuth);
 router.get("/profile", auth, admin.getProfile);
 router.put("/profile", auth, admin.updateProfile);
 router.post("/search", auth, admin.search);
+router.patch("/credit", auth, admin.credit);
 
 module.exports = router;

@@ -83,7 +83,7 @@ go
 ----------------------------------------------------------------------
 --Admin Search
 go
-CREATE PROCEDURE SearchBroadTable
+CREATE PROCEDURE DynamicSearch
     @table_name VARCHAR(50),
     @search_column VARCHAR(50),
 	@search_value VARCHAR(50),
@@ -170,3 +170,30 @@ BEGIN
 		SELECT 0
 	END
 END
+-----------------------------------------------------
+--Credit Coins
+go
+CREATE PROCEDURE CreditCoins
+  @Email VARCHAR(255),
+  @Coins INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  -- Check if the email exists in the CarOwner table
+  IF EXISTS (SELECT 1 FROM CarOwner WHERE Email = @Email)
+  BEGIN
+    -- Update the coins for the matching email
+    UPDATE CarOwner
+    SET Coins = @Coins
+    WHERE Email = @Email;
+
+    -- Optionally, you can return a success message or status code
+    SELECT 1;
+  END
+  ELSE
+  BEGIN
+    -- If the email does not exist, return an error message or handle accordingly
+    SELECT 0 ;
+  END
+END;
