@@ -5,37 +5,50 @@ const validator = require("validator");
 
 exports.loginAuth = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-    if (!validator.isEmail(email) || !password || !role) {
-        res.status(400).json({ message: "Enter all required fields." });
+    const { email, password } = req.body;
+    if (!validator.isEmail(email) || !password) {
+      res.status(400).json({ message: "Enter all required fields." });
     } else {
-        const pass = await loginOps.loginOps(email, role.toUpperCase());
-        if (pass === 0) {
-            res.status(401).send("Incorrect Email or Role");
-        } else {
-            if (await bcrypt.compare(password, pass.password)) {
-            res.send("Logged in successfully")
-        //   var jwToken;
-        //   if(role.toUpperCase() === "Car Owner"){
-        //     jwToken = generateToken(role.toUpperCase(), pass.id, pass.firstName);
-        //   }
-        //   else{
-        //     jwToken = generateToken(role.toUpperCase(), pass.id, pass.firstName);
-        //   }
-        //   res.send({
-        //     token: jwToken,
-        //     Details: Object.fromEntries(
-        //       Object.entries(pass).filter(([key]) => !key.includes("password"))
-        //     ),
-        //   });
+      const pass = await loginOps.loginOps(email);
+      if (pass === 0) {
+        res.status(401).send("Incorrect Email");
+        return;
+      } else {
+        if (await bcrypt.compare(password, pass.Password)) {
+          const details = await loginOps.getDetails(email, pass.UserRole);
+          var jwToken;
+          if (
+            pass.UserRole.toUpperCase() === "CAROWNER" ||
+            pass.UserRole.toUpperCase() === "ADMIN"
+          ) {
+            jwToken = generateToken(
+              pass.UserRole.toUpperCase(),
+              details.ID,
+              details.FirstName
+            );
+          } else {
+            jwToken = generateToken(
+              pass.UserRole.toUpperCase(),
+              details.ID,
+              details.Name
+            );
+          }
+          res.send({
+            token: jwToken,
+            role: pass.UserRole,
+            Details: details
+          })
+          return;
         } else {
           res.status(401).send("Incorrect password.");
+          return;
         }
       }
     }
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error });
+    return;
   }
 };
 const generateToken = (role, id, name) => {
