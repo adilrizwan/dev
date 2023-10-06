@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const register = require("../controllers/registerController");
-// const lotOwner = require("../controllers/lotOwnerController");
-// const auth = require("../middleware/auth");
+const lotOwnerController = require("../controllers/lotOwnerController");
+const auth = require("../middleware/auth");
 
 
-// router.get("/profile", lotOwner.getProfile)
-// router.put("/profile", auth , applicant.updateProfile)
+router.get("/profile", auth, lotOwnerController.getProfile)
+router.put("/profile", auth , lotOwnerController.updateProfile)
+router.post("/add", auth , lotOwnerController.addLot)
+router.patch("/status", auth , lotOwnerController.updateLotStatus)
 
 module.exports = router;

@@ -96,10 +96,8 @@ BEGIN
     DECLARE @query NVARCHAR(MAX);
 	DECLARE @queryCount NVARCHAR(MAX);
 
-    -- Build the SQL query based on the input parameters
     IF @search_column = 'NULL' AND @search_value = 'NULL'
 		BEGIN
-			-- Return all records from the specified table
 			IF @table_name = 'TBD' OR @table_name = 'TBDL'
 				BEGIN
 					SET @query = 'SELECT * FROM ' + QUOTENAME(@table_name) + ' ORDER BY ID OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY';
@@ -179,23 +177,65 @@ CREATE PROCEDURE CreditCoins
 AS
 BEGIN
   SET NOCOUNT ON;
-
-  -- Check if the email exists in the CarOwner table
   IF EXISTS (SELECT 1 FROM CarOwner WHERE Email = @Email)
   BEGIN
-    -- Update the coins for the matching email
     UPDATE CarOwner
     SET Coins = Coins + @Coins
     WHERE Email = @Email;
 
-    -- Optionally, you can return a success message or status code
     SELECT 1;
   END
   ELSE
   BEGIN
-    -- If the email does not exist, return an error message or handle accordingly
     SELECT 0 ;
   END
 END;
 go
 select * from CarOwner
+-------------------------------------------------------
+-- Add New Lot
+go
+CREATE PROCEDURE AddLot
+  @OwnerID INT,
+  @TotalZones INT,
+  @PostalCode varchar(20),
+  @AddressL1 varchar(50),
+  @AddressL2 varchar(50),
+  @City varchar(50),
+  @Country varchar(50)
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF EXISTS (SELECT 1 FROM LotOwner WHERE ID = @OwnerID)
+  BEGIN
+    INSERT INTO Lot(LotOwnerID, TotalZones, PostalCode, AddressL1, AddressL2, City, Country, Status) values (@OwnerID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, 'PENDING')   
+    SELECT 1;
+  END
+  ELSE
+  BEGIN
+    SELECT 0 ;
+  END
+END;
+go
+-------------------------------------------------------
+-- Update Lot Status
+CREATE PROCEDURE UpdateLotStatus
+  @LotOwnerID INT,
+  @LotID INT,
+  @Status VARCHAR(20)
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF EXISTS (SELECT 1 FROM Lot WHERE LotOwnerID = @LotOwnerID AND LotID = @LotID)
+	BEGIN
+		UPDATE Lot
+		SET Status = @Status
+		WHERE LotOwnerID = @LotOwnerID AND LotID = @LotID;
+		SELECT 1
+	END  
+  ELSE
+  BEGIN
+    SELECT 0;
+  END
+END;
+--------------------------------------
