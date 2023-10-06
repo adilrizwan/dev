@@ -100,7 +100,7 @@ exports.registerAuth = async (req, res) => {
           return
         } else {
           if (!details.phoneNo) {
-            details.phoneNo = "NULL";
+            details.phoneNo = "";
           }
           if (!details.coins) {
             details.coins = 0;
