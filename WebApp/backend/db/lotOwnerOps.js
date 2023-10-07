@@ -1,8 +1,36 @@
 const sql = require("mssql");
 const { pool } = require("./sqlConfig");
 const paginate = require("../middleware/pagination");
-const lotOwner = require("../Structures/lotOwnerStruct");
 
+exports.dashboard = async (ID, offset, pageSize) => {
+  try {
+    // let pool = await mssql.connect(config);
+    let poolS = await pool;
+    let query = await poolS
+      .request()
+      .input("ID", sql.Int, ID)
+      .input("offset", sql.Int, offset)
+      .input("pageSize", sql.Int, pageSize)
+      .query(`EXEC LotOwnerDashboard @ID, @offset, @pageSize`);
+      const fetched = await paginate.resultCount(
+        offset,
+        query.recordsets[1].length,
+        query.recordsets[0].TOTAL
+      );
+      return {
+        Results:
+          "Showing " +
+          fetched +
+          " of " +
+          query.recordsets[0][0].TOTAL +
+          " results",
+        MyLots: query.recordsets[1],
+      };
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ "DB ERROR": error });
+  }
+};
 exports.getProfile = async (ID) => {
   try {
     // let pool = await mssql.connect(config);
@@ -65,7 +93,8 @@ exports.addLot = async (ID, post) => {
       .input("AddressL2", sql.VarChar, post.AddressL2.toUpperCase())
       .input("City", sql.VarChar, post.City.toUpperCase())
       .input("Country", sql.VarChar, post.Country.toUpperCase())
-      .query(`EXEC AddLot @ID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country`);
+      .input("LotName", sql.VarChar, post.LotName.toUpperCase())
+      .query(`EXEC AddLot @ID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, @LotName`);
     if (result.recordset[0][""] === 0) {
       return 0;
     } else if (result.recordset[0][""] === 1) {

@@ -1,5 +1,19 @@
 const lotOwnerOps = require("../db/lotOwnerOps");
 const paginate = require("../middleware/pagination");
+exports.dashboard = async (req, res) => {
+  if (req.user.role === "LOTOWNER") {
+    try {
+      const pages = await paginate.paginate(req.query.page);
+      const profile = await lotOwnerOps.dashboard(req.user.id, pages.start, pages.limit);
+      res.json(profile);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
 exports.getProfile = async (req, res) => {
   if (req.user.role === "LOTOWNER") {
     try {
@@ -35,7 +49,7 @@ exports.addLot = async (req, res) => {
   if (req.user.role === "LOTOWNER") {
     try {
       const post = req.body;
-      if (!post.AddressL1 || !post.City || !post.Country) {
+      if (!post.AddressL1 || !post.City || !post.Country || !post.LotName) {
         res.status(400).json({ message: "Enter all required fields." });
         return;
       }

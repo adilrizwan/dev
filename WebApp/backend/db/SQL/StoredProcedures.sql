@@ -202,13 +202,14 @@ CREATE PROCEDURE AddLot
   @AddressL1 varchar(50),
   @AddressL2 varchar(50),
   @City varchar(50),
-  @Country varchar(50)
+  @Country varchar(50),
+  @LotName varchar(50)
 AS
 BEGIN
   SET NOCOUNT ON;
   IF EXISTS (SELECT 1 FROM LotOwner WHERE ID = @OwnerID)
   BEGIN
-    INSERT INTO Lot(LotOwnerID, TotalZones, PostalCode, AddressL1, AddressL2, City, Country, Status) values (@OwnerID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, 'PENDING')   
+    INSERT INTO Lot(LotOwnerID, TotalZones, PostalCode, AddressL1, AddressL2, City, Country, Status, LotName) values (@OwnerID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, 'PENDING', @LotName)   
     SELECT 1;
   END
   ELSE
@@ -239,3 +240,31 @@ BEGIN
   END
 END;
 --------------------------------------
+-- Lot Owner Dashboard
+CREATE PROCEDURE LotOwnerDashboard
+    @OwnerID INT,
+    @offset INT,
+    @pageSize INT
+AS
+BEGIN
+    -- Check if the appID exists in the Applicant table
+    IF EXISTS (SELECT 1 FROM LotOwner WHERE ID = @OwnerID)
+    BEGIN
+        -- Retrieve total count
+        SELECT COUNT(LotOwnerID) AS TOTAL FROM LOT WHERE LotOwnerID = @OwnerID;
+
+        -- Retrieve application details
+        SELECT LotID, LotName, City, Country, Status 
+		FROM Lot WHERE LotOwnerID = @OwnerID
+        ORDER BY LotID DESC
+        OFFSET @offset ROWS
+        FETCH NEXT @pageSize ROWS ONLY;
+    END
+    ELSE
+    BEGIN
+        -- Return an empty result if appID doesn't exist in Applicant table
+        --SELECT NULL AS LotName;
+        SELECT 0 AS TOTAL;
+        --SELECT NULL AS companyName, NULL AS job_id, NULL AS title, NULL AS employmentType, NULL AS experience, NULL AS qualifications, NULL AS currency, NULL AS salary, NULL AS location, NULL AS jobDesc, NULL AS status;
+    END
+END

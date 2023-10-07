@@ -4,6 +4,7 @@ const lotOwnerController = require("../controllers/lotOwnerController");
 const auth = require("../middleware/auth");
 
 
+router.get("/", auth , lotOwnerController.dashboard)
 router.get("/profile", auth, lotOwnerController.getProfile)
 router.put("/profile", auth , lotOwnerController.updateProfile)
 router.post("/add", auth , lotOwnerController.addLot)
