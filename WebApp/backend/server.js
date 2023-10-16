@@ -1,7 +1,8 @@
 const express = require("express");
-var colors = require('colors');
+var colors = require("colors");
 require("dotenv").config();
-const {connectMSSQL} = require("./db/sqlConfig");
+const { connectMSSQL } = require("./db/sqlConfig");
+const { connectFirebase, fb } = require("./db/firebaseConfig");
 
 const loginRoutes = require("./routes/loginRoutes");
 const registerRoutes = require("./routes/registerRoutes");
@@ -17,13 +18,30 @@ app.use(express.urlencoded({ extended: false }));
 const PORT = process.env.PORT || 5000;
 
 connectMSSQL();
+connectFirebase();
 
-app.use("/register", registerRoutes)
-app.use("/login", loginRoutes)
-app.use("/admin", adminRoutes)
-app.use("/lot", lotOwnerRoutes)
-app.use("/car", carOwnerRoutes)
+// app.post("/test", async (req, res) => {
+//   try {
+//     const id = req.body.email;
+//     const userJson = {
+//       email: req.body.email,
+//       firstName: req.body.firstName,
+//       lastName: req.body.lastName,
+//     };
+//     const response = await fb.collection("test").doc(id).set(userJson);
+//     res.send(response);
+//   } catch (error) {
+//     console.log(error)
+//     res.send(error);
+//   }
+// });
+
+app.use("/register", registerRoutes);
+app.use("/login", loginRoutes);
+app.use("/admin", adminRoutes);
+app.use("/lot", lotOwnerRoutes);
+app.use("/car", carOwnerRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server is listening on ${PORT}`.underline.yellow);
+  console.log(`Server is listening on ${PORT}`.underline.magenta);
 });
