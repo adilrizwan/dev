@@ -59,7 +59,7 @@ exports.updateProfile = async (ID, post) => {
             BEGIN
                 UPDATE LotOwner SET 
                     Name = @Name,  
-                    phoneNo = @phoneNo 
+                    PhoneNo = @PhoneNo 
                 WHERE ID = @ID;
                 SELECT 1;
             END

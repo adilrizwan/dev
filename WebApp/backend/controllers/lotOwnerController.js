@@ -35,7 +35,7 @@ exports.updateProfile = async (req, res) => {
       if (update === 1) {
         res.status(200).json({ message: "Success" });
       } else {
-        res.status(204).json({ message: "Post not found" });
+        res.status(204).json({ message: "User not found" });
       }
     } catch (error) {
       console.log(error);
