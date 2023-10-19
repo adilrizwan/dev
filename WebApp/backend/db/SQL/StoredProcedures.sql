@@ -268,3 +268,71 @@ BEGIN
         --SELECT NULL AS companyName, NULL AS job_id, NULL AS title, NULL AS employmentType, NULL AS experience, NULL AS qualifications, NULL AS currency, NULL AS salary, NULL AS location, NULL AS jobDesc, NULL AS status;
     END
 END
+----------------------------------------------------------------------------------------------------------------------
+--Add Car
+CREATE PROCEDURE AddCar
+    @ID INT,
+    @RegistrationNumber VARCHAR(10),
+    @Make VARCHAR(50),
+    @Model VARCHAR(50),
+    @RegYear INT,
+    @Color VARCHAR(20),
+    @Type VARCHAR(15)
+AS
+BEGIN
+    SET NOCOUNT ON;
+        IF EXISTS (SELECT 1 FROM Car WHERE RegistrationNumber = @RegistrationNumber AND Status != 'DELETED')
+        BEGIN 
+           SELECT 0;
+        END
+        ELSE
+        BEGIN
+            INSERT INTO Car (OwnerID, RegistrationNumber, Make, Model, RegYear, Color, Type, Status)
+            VALUES (@ID, @RegistrationNumber, @Make, @Model, @RegYear, @Color, @Type, 'PENDING');
+
+			SELECT 1
+        END
+END;
+-------------------------------------------------------
+CREATE PROCEDURE DeleteCar
+  @OwnerID INT,
+  @RegNo VarChar(10)
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF EXISTS (SELECT 1 FROM Car WHERE OwnerID = @OwnerID AND RegistrationNumber = @RegNo)
+  BEGIN
+    DELETE FROM Car
+    WHERE OwnerID = @OwnerID AND RegistrationNumber = @RegNo;
+    SELECT 1;
+  END
+  ELSE
+  BEGIN
+    SELECT 0;
+  END
+END;
+
+-------------------------------------------------------
+-- Update Car Status
+CREATE PROCEDURE UpdateCarStatus
+  @OwnerID INT,
+  @RegNo VarChar(10),
+  @Status VARCHAR(20)
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF EXISTS (SELECT 1 FROM Car WHERE OwnerID = @OwnerID AND RegistrationNumber = @RegNo)
+	BEGIN
+		UPDATE Car
+		SET Status = @Status
+		WHERE OwnerID = @OwnerID AND RegistrationNumber = @RegNo;
+		SELECT 1
+	END  
+  ELSE
+  BEGIN
+    SELECT 0;
+  END
+END;
+--------------------------------------
+select * from Car_Audit
+select * from Car
