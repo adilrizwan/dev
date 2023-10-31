@@ -281,7 +281,7 @@ CREATE PROCEDURE AddCar
 AS
 BEGIN
     SET NOCOUNT ON;
-        IF EXISTS (SELECT 1 FROM Car WHERE RegistrationNumber = @RegistrationNumber AND Status != 'DELETED')
+        IF EXISTS (SELECT 1 FROM Car WHERE RegistrationNumber = @RegistrationNumber)
         BEGIN 
            SELECT 0;
         END
