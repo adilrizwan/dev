@@ -1,7 +1,8 @@
 const {spawn} = require('child_process')
+require("dotenv").config();
 
 const detectSpaces = async ()=>{
-    const pythonProcess = spawn('python', ['./cv/detection/main.py']);
+    const pythonProcess = spawn('python', ['./cv/detection/main.py', process.env.URL]);
 
     pythonProcess.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);

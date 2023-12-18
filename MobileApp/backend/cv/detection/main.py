@@ -4,8 +4,12 @@ import cvzone
 import numpy as np
 import requests
 import os
+import sys
 
-print(os.getcwd())
+api_url = sys.argv[1] + "1/1"
+# print("url",api_url)
+
+# print(os.getcwd())
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,6 +55,9 @@ def checkParkingSpace(imgPro):
 
     if empty_prev != empty_curr:
         delta = 1
+
+        response = requests.patch(api_url, json={"empty": empty})
+
     else:
         delta = 0
 
