@@ -1,6 +1,6 @@
 require("dotenv").config();
 const cors = require('cors');
-const {detectSpaces} = require('./cv/parkingController')
+const {detectSpaces} = require('./cv/spaceDetector')
 const parkingSpaceRouter = require("./routes/parkingSpaceRouter")
 require("colors");
 
@@ -14,10 +14,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 app.use("/", parkingSpaceRouter)
-const PORT = 5000;
-// process.env.PORT
+const PORT = process.env.PORT || 8000;
+
 connectFirebase();
-// detectSpaces();
+detectSpaces();
 
 app.listen(PORT, () => {
   console.log(`\nMobile App Server is listening on ${PORT}`.underline.green);
