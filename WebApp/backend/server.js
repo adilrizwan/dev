@@ -1,6 +1,7 @@
 const express = require("express");
 var colors = require("colors");
 require("dotenv").config();
+const cors = require("cors");
 const { connectMSSQL } = require("./db/sqlConfig");
 const { connectFirebase, fb } = require("./db/firebaseConfig");
 
@@ -12,6 +13,7 @@ const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
