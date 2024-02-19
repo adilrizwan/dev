@@ -1,6 +1,9 @@
 import { createContext, useState, useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 
+
+export const pageSize = 6;
+
 export const margins = {
   margin: "15px 0px 5px 0px",
 };
@@ -22,6 +25,12 @@ export const tokens = (mode) => ({
         },
         red: {
           main: "#F44336",
+        },
+        yellow: {
+          main: "#ffc800"
+        },
+        green: {
+          main: "#5AB83D"
         },
         text: {
           primary: "#1d1d1b",
@@ -47,6 +56,12 @@ export const tokens = (mode) => ({
         },
         red: {
           main: "#F44336",
+        },
+        yellow: {
+          main: "#ffc800"
+        },
+        green: {
+          main: "#5AB83D"
         },
         text: {
           primary: "#000000",
@@ -82,6 +97,12 @@ export const themeSettings = (mode) => {
             red: {
               main: colors.red.main,
             },
+            yellow: {
+              main: colors.yellow.main,
+            },
+            green: {
+              main: colors.green.main,
+            },
             text: {
               white: colors.text.primary,
               grey: colors.text.secondary,
@@ -106,6 +127,12 @@ export const themeSettings = (mode) => {
             },
             red: {
               main: colors.red.main,
+            },
+            yellow: {
+              main: colors.yellow.main,
+            },
+            green: {
+              main: colors.green.main,
             },
             text: {
               black: colors.text.primary,
@@ -152,20 +179,29 @@ export const themeSettings = (mode) => {
   };
 };
 
-export const ColorModeContext = createContext({
+
+const ColorModeContext = createContext({
   toggleColorMode: () => {},
 });
 
-export const useMode = () => {
-  const [mode, setMode] = useState("light");
-  const colorMode = useMemo(
-    () => ({
-      toggleColorMode: () =>
-        setMode((prev) => (prev === "dark" ? "light" : "dark")),
-    }),
-    []
+const useMode = () => {
+  const storedColorMode = sessionStorage.getItem("colorMode");
+  const initialColorMode = storedColorMode || "light";
+
+  const [colorMode, setColorMode] = useState(initialColorMode);
+
+  const toggleColorMode = () => {
+    const newColorMode = colorMode === "dark" ? "light" : "dark";
+    setColorMode(newColorMode);
+    sessionStorage.setItem("colorMode", newColorMode);
+  };
+
+  const theme = useMemo(
+    () => createTheme(themeSettings(colorMode)),
+    [colorMode]
   );
 
-  const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
-  return [theme, colorMode];
+  return [theme, { toggleColorMode }];
 };
+
+export { ColorModeContext, useMode };
