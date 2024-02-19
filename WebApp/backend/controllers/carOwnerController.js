@@ -1,10 +1,12 @@
 const carOwnerOps = require("../db/carOwnerOps");
 const paginate = require("../middleware/pagination");
-exports.dashboard = async (req, res) => {
+const { fb } = require("../db/firebaseConfig");
+
+exports.viewVehicles = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
       const pages = await paginate.paginate(req.query.page);
-      const profile = await carOwnerOps.dashboard(
+      const profile = await carOwnerOps.viewVehicles(
         req.user.id,
         pages.start,
         pages.limit
@@ -59,6 +61,7 @@ exports.addCar = async (req, res) => {
         !post.Model ||
         !post.RegYear ||
         !post.Color ||
+        !post.RegisteredCountry ||
         !post.Type
       ) {
         res.status(400).json({ message: "Enter all required fields." });
@@ -68,7 +71,7 @@ exports.addCar = async (req, res) => {
       if (update === 1) {
         res.status(200).json({ message: "Success" });
       } else {
-        res.status(204).json({ message: "Car is already registered." });
+        res.status(409).json({ message: "Car is already registered." });
       }
     } catch (error) {
       console.log(error);
@@ -78,11 +81,49 @@ exports.addCar = async (req, res) => {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+exports.support = async (req, res) => {
+  if (req.user.role === "CAROWNER") {
+    try {
+      const subject = req.body.subject;
+      const id = req.user.id + ": " + subject;
+      const body = req.body.body;
+
+      if (!subject || !body) {
+        res.status(400).json({ message: "Enter all required fields." });
+        return;
+      }
+      if (subject.length > 65) {
+        res
+          .status(400)
+          .json({ message: "Subject must be maximum 60 characters long." });
+        return;
+      }
+
+      if (body.length > 510) {
+        res
+          .status(400)
+          .json({ message: "Body must be maximum 500 characters long." });
+        return;
+      }
+      const response = await fb
+        .collection("Car-Support")
+        .doc(id)
+        .set({ subject, body, status: "PENDING" });
+      res.send(response);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
 exports.deleteCar = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
-      const post = req.body;
-      const update = await carOwnerOps.deleteCar(req.user.id, post);
+      const carNum = decodeURIComponent(req.params.regno);
+      const update = await carOwnerOps.deleteCar(req.user.id, carNum);
       if (update === 1) {
         res.status(200).json({ message: "Success" });
       } else {
