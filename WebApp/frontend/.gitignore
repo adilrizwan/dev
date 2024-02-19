@@ -27,3 +27,4 @@ yarn-error.log*
 color.txt
 parksenselogo_3.ai
 ParkSenseLogo_3.png
+/src/constants/firebaseConfig.js
