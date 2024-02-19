@@ -277,7 +277,9 @@ CREATE PROCEDURE AddCar
     @Model VARCHAR(50),
     @RegYear INT,
     @Color VARCHAR(20),
-    @Type VARCHAR(15)
+    @Type VARCHAR(15),
+	@RegisteredCountry VARCHAR(MAX), 
+	@RegisteredCity VARCHAR(MAX)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -287,8 +289,8 @@ BEGIN
         END
         ELSE
         BEGIN
-            INSERT INTO Car (OwnerID, RegistrationNumber, Make, Model, RegYear, Color, Type, Status)
-            VALUES (@ID, @RegistrationNumber, @Make, @Model, @RegYear, @Color, @Type, 'PENDING');
+            INSERT INTO Car (OwnerID, RegistrationNumber, Make, Model, RegYear, Color, Type, Status, RegisteredCountry, RegisteredCity)
+            VALUES (@ID, @RegistrationNumber, @Make, @Model, @RegYear, @Color, @Type, 'PENDING', @RegisteredCountry, @RegisteredCity);
 
 			SELECT 1
         END
@@ -311,12 +313,11 @@ BEGIN
     SELECT 0;
   END
 END;
-
 -------------------------------------------------------
 -- Update Car Status
 CREATE PROCEDURE UpdateCarStatus
   @OwnerID INT,
-  @RegNo VarChar(10),
+  @RegNo VarChar(10)
   @Status VARCHAR(20)
 AS
 BEGIN
@@ -334,5 +335,34 @@ BEGIN
   END
 END;
 --------------------------------------
+CREATE PROCEDURE ViewVehicles
+    @OwnerID INT,
+    @offset INT,
+    @pageSize INT
+AS
+BEGIN
+    -- Check if the appID exists in the Applicant table
+    IF EXISTS (SELECT 1 FROM CarOwner WHERE ID = @OwnerID)
+    BEGIN
+        -- Retrieve total count
+        SELECT COUNT(OwnerID) AS TOTAL FROM Car WHERE OwnerID = @OwnerID;
+
+        -- Retrieve application details
+        SELECT * FROM CAR WHERE OwnerID = @OwnerID
+        ORDER BY RegYear DESC
+        OFFSET @offset ROWS
+        FETCH NEXT @pageSize ROWS ONLY;
+    END
+    ELSE
+    BEGIN
+        -- Return an empty result if appID doesn't exist in Applicant table
+        --SELECT NULL AS LotName;
+        SELECT 0 AS TOTAL;
+    END
+END
+-----------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------
 select * from Car_Audit
 select * from Car
+
