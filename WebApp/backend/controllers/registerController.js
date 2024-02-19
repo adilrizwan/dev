@@ -33,8 +33,8 @@ exports.registerAuth = async (req, res) => {
         } else {
           const admin = new adminStruct(
             details.role.toUpperCase(),
-            details.firstName.toUpperCase().replace(/'/gi, "''"),
-            details.lastName.toUpperCase().replace(/'/gi, "''"),
+            details.firstName.replace(/'/gi, "''"),
+            details.lastName.replace(/'/gi, "''"),
             details.email.toUpperCase()
           );
           const succ = await registerOps.adminRegister(                                     
@@ -66,7 +66,7 @@ exports.registerAuth = async (req, res) => {
           const lotOwner = new lotOwnerStruct(
             details.role.toUpperCase(),
             details.email.toUpperCase(),
-            details.name.toUpperCase().replace(/'/gi, "''"),
+            details.name.replace(/'/gi, "''"),
             details.phoneNo
             );
           const succ = await registerOps.lotOwnerRegister(                                 
@@ -107,14 +107,14 @@ exports.registerAuth = async (req, res) => {
           }
           const carOwner = new carOwnerStruct(
             details.role.toUpperCase(),
-            details.firstName.toUpperCase().replace(/'/gi, "''"),
-            details.lastName.toUpperCase().replace(/'/gi, "''"),
-            details.gender.toUpperCase().replace(/'/gi, "''"),
+            details.firstName.replace(/'/gi, "''"),
+            details.lastName.replace(/'/gi, "''"),
+            details.gender.replace(/'/gi, "''"),
             details.DOB,
             details.phoneNo,
             details.email.toUpperCase(),
-            details.city.toUpperCase().replace(/'/gi, "''"),
-            details.country.toUpperCase().replace(/'/gi, "''"),
+            details.city.replace(/'/gi, "''"),
+            details.country.replace(/'/gi, "''"),
             details.coins
           );
           const succ = await registerOps.carOwnerRegister(                                  
