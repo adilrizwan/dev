@@ -1,45 +1,48 @@
 import * as React from 'react'
-import { Box, useTheme, Switch, Tooltip, IconButton, Avatar, Menu, MenuItem, Typography, AppBar, Toolbar, Container } from "@mui/material"
+import { Box, useTheme, Switch, AppBar, Toolbar, Container, Button } from "@mui/material"
 import { useContext } from "react"
 import { ColorModeContext } from "../constants/theme"
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
-import { Link, useNavigate } from 'react-router-dom';
-import { settings } from '../constants/Menus'
-import Logo from '../images/parksense_logo.png'
-import avatar from '../images/avatar.jpg'
+import { Link } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { initializeApp } from 'firebase/app';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import firebaseConfig from '../constants/firebaseConfig';
 
 function LoggedUser() {
-    const navigate = useNavigate();
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
-
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
-    };
-
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userName');
         localStorage.removeItem('userRole');
         window.location.assign('/')
-        setAnchorElUser(null);
+
     };
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
     const role = localStorage.getItem('userRole');
-    const handleDashboard = () => {
-        navigate(`/${role.toLowerCase()}/dashboard`)
-        setAnchorElUser(null);
-    };
-    const handleProfile = () => {
-        window.location.assign(`/${role.toLowerCase()}/profile`)
-        setAnchorElUser(null);
-    };
+    var LogoRedirect;
+    if (role === 'CAROWNER') {
+        LogoRedirect = "car/dashboard"
+    } else if (role === 'LOTOWNER') {
+        LogoRedirect = "lot/dashboard"
+    } else {
+        LogoRedirect = "admin/dashboard"
+    }
+
+    const [logoUrl, setLogoUrl] = React.useState(null);
+    const logoRef = ref(storage, 'Logo/parksense_logo.png');
+    React.useEffect(() => {
+        getDownloadURL(logoRef)
+            .then((url) => {
+                setLogoUrl(url);
+            })
+            .catch((error) => {
+                console.error('Error fetching logo URL:', error);
+            });
+    }, [logoRef]);
 
     const theme = useTheme();
-
     const colorMode = useContext(ColorModeContext);
 
     return (
@@ -47,10 +50,8 @@ function LoggedUser() {
             <Container maxWidth="xl">
                 <Toolbar sx={{ justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Link to="/" style={{ textDecoration: 'none' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <img src={Logo} alt="logo" style={{ width: '120px', marginRight: '10px' }} />
-                            </Box>
+                        <Link to={LogoRedirect} style={{ textDecoration: 'none' }}>
+                            <img src={logoUrl} alt="logo" style={{ width: '140px' }} />
                         </Link>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -69,37 +70,7 @@ function LoggedUser() {
                                 }
                             }}
                         />
-                        <Box>
-                            <Tooltip title="Open settings">
-                                <IconButton sx={{ p: 0 }}>
-                                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar src={avatar} />
-                                    </IconButton>
-                                </IconButton>
-                            </Tooltip>
-                            <Menu
-                                sx={{ mt: '45px' }}
-                                id="menu-appbar"
-                                anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={Boolean(anchorElUser)}
-                                onClose={handleCloseUserMenu}
-                            >
-                                {settings.map((setting) => (
-                                    <MenuItem key={setting} onClick={setting === 'Logout' ? handleLogout : setting === 'Dashboard' ? handleDashboard : setting === 'Profile' ? handleProfile : handleCloseUserMenu}>
-                                        <Typography textAlign="center">{setting}</Typography>
-                                    </MenuItem>
-                                ))}
-                            </Menu>
-                        </Box>
+                        <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>Logout</Button>
                     </Box>
                 </Toolbar>
             </Container>
@@ -108,4 +79,3 @@ function LoggedUser() {
 }
 
 export default LoggedUser;
-

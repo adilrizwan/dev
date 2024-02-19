@@ -9,7 +9,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import { Link, useNavigate } from 'react-router-dom';
-import Logo from '../images/parksense_logo.png'
+import { initializeApp } from 'firebase/app';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import firebaseConfig from '../constants/firebaseConfig';
+
 function GuestUser() {
     const navigate = useNavigate();
 
@@ -24,6 +27,19 @@ function GuestUser() {
     const theme = useTheme();
 
     const colorMode = useContext(ColorModeContext);
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
+    const [logoUrl, setLogoUrl] = React.useState(null);
+    const logoRef = ref(storage, 'Logo/parksense_logo.png');
+    React.useEffect(() => {
+        getDownloadURL(logoRef)
+            .then((url) => {
+                setLogoUrl(url);
+            })
+            .catch((error) => {
+                console.error('Error fetching logo URL:', error);
+            });
+    }, [logoRef]);
 
     return (
         <AppBar color='inherit' position="sticky" style={{ marginBottom: '5px', backgroundColor: theme.palette.background.default }}>
@@ -32,7 +48,7 @@ function GuestUser() {
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Link to="/" style={{ textDecoration: 'none' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <img src={Logo} alt="logo" style={{ width: '120px', marginRight: '10px' }} />
+                                <img src={logoUrl} alt="logo" style={{ width: '140px' }} />
                             </Box>
                         </Link>
                     </Box>
