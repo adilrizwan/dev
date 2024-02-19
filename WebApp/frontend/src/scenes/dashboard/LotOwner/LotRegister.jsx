@@ -9,7 +9,7 @@ import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import firebaseConfig from '../../../constants/firebaseConfig'
 
 
-export default function RegisterLotOwner() {
+export default function LotOwnerRegister() {
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
     const [logoUrl, setLogoUrl] = React.useState(null);
