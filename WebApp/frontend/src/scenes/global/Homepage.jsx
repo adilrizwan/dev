@@ -1,20 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Typography, Container, Grid, useTheme, Button } from '@mui/material';
-import img from "../../images/32.png";
-import first from "../../images/first.png";
-import woman from "../../images/parker.png";
-import customersupport from "../../images/customersupport.png";
-import realtime from "../../images/realtime.png";
-import user from "../../images/user.png";
+import { initializeApp } from 'firebase/app';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import firebaseConfig from '../../constants/firebaseConfig';
 import Plans from './Plans';
 
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
+
 export default function Homepage() {
-    const theme = useTheme()
+    const theme = useTheme();
+    const [images, setImages] = useState({});
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            try {
+                const imageRefs = [
+                    "MiniLot.png",
+                    "parkingapp.png",
+                    "parker.png",
+                    "customersupport.png",
+                    "realtime.png",
+                    "user.png"
+                ];
+                const urls = {};
+                await Promise.all(imageRefs.map(async (imageName) => {
+                    const path = `Homepage/${imageName}`;
+                    const imageRef = ref(storage, path);
+                    try {
+                        const url = await getDownloadURL(imageRef);
+                        urls[imageName] = url;
+                    } catch (error) {
+                        console.error("Error getting download URL for", imageName, ":", error);
+                        urls[imageName] = null;
+                    }
+                }));
+                setImages(urls);
+            } catch (error) {
+                console.error("Error fetching images:", error);
+            }
+        };
+        fetchImages();
+    }, []);
 
     return (
         <Container sx={{ p: 5 }}>
             <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} sm={6} >
+                <Grid item xs={12} sm={6}>
                     <Typography
                         variant="h2"
                         align="center"
@@ -28,14 +60,14 @@ export default function Homepage() {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <img src={first} alt="lot" style={{ maxWidth: '70%', height: 'auto' }} />
+                    <img src={images["parkingapp.png"]} alt="parking-app" style={{ maxWidth: '70%', height: 'auto' }} />
                 </Grid>
             </Grid>
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <img src={woman} alt="lot" style={{ maxWidth: '80%', height: 'auto' }} />
+                    <img src={images["parker.png"]} alt="customer" style={{ maxWidth: '80%', height: 'auto' }} />
                 </Grid>
-                <Grid item xs={12} sm={6} sx={{mt:10}} >
+                <Grid item xs={12} sm={6} sx={{ mt: 10 }} >
                     <Typography
                         variant="h2"
                         align="center"
@@ -79,7 +111,7 @@ export default function Homepage() {
                         </Button>
                     </Grid>
                     <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-                        <img src={img} alt="lot" style={{ maxWidth: '80%', height: 'auto' }} />
+                        <img src={images["MiniLot.png"]} alt="lot" style={{ maxWidth: '80%', height: 'auto' }} />
                     </Grid>
                 </Grid>
 
@@ -89,19 +121,19 @@ export default function Homepage() {
             </Grid>
             <Grid container spacing={1} alignItems="center" justifyContent="center" sx={{ marginTop: '50px' }}>
                 <Grid item xs={12} sm={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <img src={user} alt="feature" style={{ maxWidth: '40%', height: 'auto', borderRadius: '50%' }} />
+                    <img src={images["user.png"]} alt="feature" style={{ maxWidth: '40%', height: 'auto', borderRadius: '50%' }} />
                     <Typography variant="h4" color="text.primary" align="center" gutterBottom>
                         User-Friendly Interface
                     </Typography>
                 </Grid>
                 <Grid item xs={12} sm={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <img src={realtime} alt="feature" style={{ maxWidth: '40%', height: 'auto', borderRadius: '50%' }} />
+                    <img src={images["realtime.png"]} alt="realtime-feature" style={{ maxWidth: '40%', height: 'auto', borderRadius: '50%' }} />
                     <Typography variant="h4" color="text.primary" align="center" gutterBottom>
                         Real-time Updates
                     </Typography>
                 </Grid>
                 <Grid item xs={12} sm={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <img src={customersupport} alt="feature" style={{ maxWidth: '40%', height: 'auto', borderRadius: '50%' }} />
+                    <img src={images["customersupport.png"]} alt="customersupport-feature" style={{ maxWidth: '40%', height: 'auto', borderRadius: '50%' }} />
                     <Typography variant="h4" color="text.primary" align="center" gutterBottom>
                         24/7 Customer Support
                     </Typography>

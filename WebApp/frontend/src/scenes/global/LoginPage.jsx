@@ -13,8 +13,9 @@ import {
   Paper,
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
-import login_l from '../../images/login2d.png';
-import login_d from '../../images/login2e.png';
+import { initializeApp } from 'firebase/app';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import firebaseConfig from '../../constants/firebaseConfig'
 import axios from 'axios';
 
 export default function SignInSide() {
@@ -26,6 +27,10 @@ export default function SignInSide() {
   const [error, setError] = React.useState(null);
   const [emailError, setEmailError] = React.useState(null);
   const [snackbarSeverity, setSnackbarSeverity] = React.useState('');
+  const [loginImages, setLoginImages] = React.useState({
+    login_l: '',
+    login_d: '',
+  });
 
   const { email, password } = details;
 
@@ -42,6 +47,27 @@ export default function SignInSide() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  const loadLoginImages = async () => {
+    try {
+      const app = initializeApp(firebaseConfig);
+      const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
+
+      const login_l_url = await getDownloadURL(ref(storage, 'LoginPage/login_l.png'));
+      const login_d_url = await getDownloadURL(ref(storage, 'LoginPage/login_d.png'));
+
+      setLoginImages({
+        login_l: login_l_url,
+        login_d: login_d_url,
+      });
+    } catch (error) {
+      console.error('Error loading login images:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    loadLoginImages();
+  }, []);
+
   const onSubmit = async (event) => {
     event.preventDefault();
     setError(null);
@@ -56,14 +82,20 @@ export default function SignInSide() {
       console.log(details)
       localStorage.setItem('token', response.data.token);
       const userName =
-        response.data.role.toUpperCase() === 'CAROWNER'
-          ? response.data.Details.FirstName
-          : response.data.Details.Name;
+        response.data.role.toUpperCase() === 'LOTOWNER'
+          ? response.data.Details.Name
+          : response.data.Details.FirstName + " " + response.data.Details.LastName;
 
       localStorage.setItem('userName', userName);
       localStorage.setItem('userRole', response.data.role.toUpperCase());
 
-      window.location.assign(`/`);
+      if (response.data.role.toUpperCase() === 'CAROWNER') {
+        window.location.assign(`/car/dashboard`);
+      } else if (response.data.role.toUpperCase() === 'LOTOWNER') {
+        window.location.assign(`/lot/dashboard`);
+      } else {
+        window.location.assign(`/admin/dashboard`);
+      }
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setSnackbarSeverity('error')
@@ -84,7 +116,7 @@ export default function SignInSide() {
         sm={4}
         md={7}
         sx={{
-          backgroundImage: `url(${theme.palette.mode === 'dark' ? login_d : login_l})`,
+          backgroundImage: `url(${theme.palette.mode === 'dark' ? loginImages.login_d : loginImages.login_l})`,
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -192,3 +224,4 @@ export default function SignInSide() {
     </Grid>
   );
 }
+
