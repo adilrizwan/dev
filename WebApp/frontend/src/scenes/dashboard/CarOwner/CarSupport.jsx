@@ -3,7 +3,7 @@ import { Grid, Box, Button, Typography, TextField, Paper, Alert } from '@mui/mat
 import { margins } from '../../../constants/theme';
 import axios from 'axios';
 
-export default function Support() {
+export default function CarSupport() {
     const token = localStorage.getItem('token');
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');

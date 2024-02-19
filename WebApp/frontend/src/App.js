@@ -6,9 +6,9 @@ import GuestUser from "./components/GuestUser";
 import LoggedUser from "./components/LoggedUser";
 import Homepage from "./scenes/global/Homepage";
 import RegisterPage from "./scenes/global/RegisterPage";
-import RegisterAdmin from "./scenes/dashboard/Admin/RegisterAdmin";
-import RegisterCarOwner from "./scenes/dashboard/CarOwner/RegisterCarOwner";
-import RegisterLotOwner from "./scenes/dashboard/LotOwner/RegisterLotOwner";
+import AdminRegister from "./scenes/dashboard/Admin/AdminRegister";
+import CarRegister from "./scenes/dashboard/CarOwner/CarRegister";
+import LotRegister from "./scenes/dashboard/LotOwner/LotRegister";
 import LoginPage from "./scenes/global/LoginPage";
 import NotFound from "./scenes/global/NotFound";
 import CarDashboard from "./scenes/dashboard/CarOwner/CarDashboard";
@@ -39,9 +39,9 @@ function App() {
               <Route path="/" element={<Homepage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/admin/register" element={<RegisterAdmin />} />
-              <Route path="/car/register" element={<RegisterCarOwner />} />
-              <Route path="/lot/register" element={<RegisterLotOwner />} />
+              <Route path="/admin/register" element={<AdminRegister />} />
+              <Route path="/car/register" element={<CarRegister />} />
+              <Route path="/lot/register" element={<LotRegister />} />
 
               <Route path="/*" element={<NotFound />} />
             </Routes>
@@ -57,7 +57,10 @@ function App() {
             </Routes>
           ) : user === "ADMIN" ? (
             <Routes>
-              <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+              <Route
+                path="/admin/dashboard"
+                element={<AdminDashboard />}
+              ></Route>
               <Route path="/*" element={<NotFound />} />
             </Routes>
           ) : (

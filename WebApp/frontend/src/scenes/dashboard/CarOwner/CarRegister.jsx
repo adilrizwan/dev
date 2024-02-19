@@ -10,7 +10,7 @@ import { initializeApp } from 'firebase/app';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import firebaseConfig from '../../../constants/firebaseConfig'
 
-export default function RegisterCarOwner() {
+export default function CarRegister() {
 
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app, "gs://parksense-82db2.appspot.com");

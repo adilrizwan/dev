@@ -11,7 +11,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { initializeApp } from 'firebase/app';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import firebaseConfig from '../../../constants/firebaseConfig'
-import Support from './Support';
+import CarSupport from './CarSupport';
 import CarProfile from './CarProfile';
 import CarView from './CarView';
 
@@ -158,7 +158,7 @@ const CarDrawerList = ({ onTabClick }) => (
         <Divider sx={{ mx: 2 }} />
 
         {/* <Divider /> */}
-        <ListItemButton onClick={() => onTabClick(<Support />)}>
+        <ListItemButton onClick={() => onTabClick(<CarSupport />)}>
             <ListItemIcon>
                 <HelpOutlineOutlinedIcon />
             </ListItemIcon>
