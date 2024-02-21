@@ -35,7 +35,10 @@ exports.getDetails = async (email, role) => {
     if (query.recordset[0][""] === 0) {
       return query.recordset[0][""];
     } else if (query.recordset[0]) {
-      return query.recordset[0];
+      return {
+        User: query.recordsets[0][0],
+        Avatar: query.recordsets[1][0].AvatarID
+      } 
     } else {
       console.log(error);
       res.status(400).json({ "DB ERROR": error });

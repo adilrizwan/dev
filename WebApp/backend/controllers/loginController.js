@@ -24,8 +24,9 @@ exports.loginAuth = async (req, res) => {
       ) {
         jwToken = generateToken(
           pass.UserRole.toUpperCase(),
-          details.ID,
-          details.FirstName
+          details.User.ID,
+          details.User.FirstName + " " + details.User.LastName,
+          details.Avatar
         );
       } else {
         jwToken = generateToken(
@@ -43,13 +44,12 @@ exports.loginAuth = async (req, res) => {
       return res.status(401).json({ message: "Invalid Credentials." });
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-const generateToken = (role, id, name) => {
-  return jwt.sign({ role, id, name }, process.env.JWT_SECRET, {
+const generateToken = (role, id, name, avatar) => {
+  return jwt.sign({ role, id, name, avatar }, process.env.JWT_SECRET, {
     expiresIn: "10000s",
   });
 };
