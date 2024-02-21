@@ -1,7 +1,7 @@
 import { ColorModeContext, useMode } from "./constants/theme";
 import { Routes, Route } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import GuestUser from "./components/GuestUser";
 import LoggedUser from "./components/LoggedUser";
 import Homepage from "./scenes/global/Homepage";
@@ -18,7 +18,16 @@ import Footer from "./components/Footer";
 
 function App() {
   const [theme, { toggleColorMode }] = useMode();
-  const [user] = useState(localStorage.getItem("userRole"));
+  const token = localStorage.getItem("token");
+  let user;
+
+  if (token) {
+    const [payload] = token.split(".").slice(1, 2);
+    const decodedPayload = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    user = decodedPayload.role;
+  }
 
   useEffect(() => {
     const storedColorMode = sessionStorage.getItem("colorMode");
@@ -31,9 +40,8 @@ function App() {
     <ColorModeContext.Provider value={{ toggleColorMode }}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {/* <Router> */}
         <div className="container">
-          {user ? <LoggedUser></LoggedUser> : <GuestUser></GuestUser>}
+          {user ? <LoggedUser /> : <GuestUser />}
           {!user ? (
             <Routes>
               <Route path="/" element={<Homepage />} />
@@ -42,33 +50,28 @@ function App() {
               <Route path="/admin/register" element={<AdminRegister />} />
               <Route path="/car/register" element={<CarRegister />} />
               <Route path="/lot/register" element={<LotRegister />} />
-
               <Route path="/*" element={<NotFound />} />
             </Routes>
           ) : user === "CAROWNER" ? (
             <Routes>
-              <Route path="/car/dashboard" element={<CarDashboard />}></Route>
+              <Route path="/car/dashboard" element={<CarDashboard />} />
               <Route path="/*" element={<NotFound />} />
             </Routes>
           ) : user === "LOTOWNER" ? (
             <Routes>
-              <Route path="/lot/dashboard" element={<LotDashboard />}></Route>
+              <Route path="/lot/dashboard" element={<LotDashboard />} />
               <Route path="/*" element={<NotFound />} />
             </Routes>
           ) : user === "ADMIN" ? (
             <Routes>
-              <Route
-                path="/admin/dashboard"
-                element={<AdminDashboard />}
-              ></Route>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/*" element={<NotFound />} />
             </Routes>
           ) : (
-            <Homepage></Homepage>
+            <Homepage />
           )}
-          <Footer></Footer>
+          <Footer />
         </div>
-        {/* </Router> */}
       </ThemeProvider>
     </ColorModeContext.Provider>
   );
