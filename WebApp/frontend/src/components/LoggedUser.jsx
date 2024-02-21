@@ -13,21 +13,22 @@ import firebaseConfig from '../constants/firebaseConfig';
 function LoggedUser() {
     const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userRole');
         window.location.assign('/')
 
     };
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
-    const role = localStorage.getItem('userRole');
+    const token = localStorage.getItem('token');
+    const [payload] = token.split('.').slice(1, 2);
+    const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    
     var LogoRedirect;
-    if (role === 'CAROWNER') {
-        LogoRedirect = "car/dashboard"
-    } else if (role === 'LOTOWNER') {
+    if (decodedPayload.role === 'ADMIN') {
+        LogoRedirect = "admin/dashboard"
+    } else if (decodedPayload.role === 'LOTOWNER') {
         LogoRedirect = "lot/dashboard"
     } else {
-        LogoRedirect = "admin/dashboard"
+        LogoRedirect = "car/dashboard"
     }
 
     const [logoUrl, setLogoUrl] = React.useState(null);

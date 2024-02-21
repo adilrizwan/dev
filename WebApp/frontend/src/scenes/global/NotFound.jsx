@@ -19,14 +19,17 @@ function NotFound() {
             });
     }, [logoRef]);
 
-    const user = localStorage.getItem('userRole');
+    const token = localStorage.getItem('token');
+    const [payload] = token.split('.').slice(1, 2);
+    const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+
     var LogoRedirect;
-    if (user === 'CAROWNER') {
-        LogoRedirect = "car/dashboard"
-    } else if (user === 'LOTOWNER') {
+    if (decodedPayload.role === 'ADMIN') {
+        LogoRedirect = "admin/dashboard"
+    } else if (decodedPayload.role === 'LOTOWNER') {
         LogoRedirect = "lot/dashboard"
     } else {
-        LogoRedirect = "admin/dashboard"
+        LogoRedirect = "car/dashboard"
     }
 
     return (
@@ -43,7 +46,7 @@ function NotFound() {
                         <Button
                             variant="contained"
                             onClick={() => {
-                                !user ? window.location.assign('/login') : window.location.assign(`/${LogoRedirect}`);
+                                !decodedPayload.role ? window.location.assign('/login') : window.location.assign(`/${LogoRedirect}`);
                             }}
                         >
                             Take me back

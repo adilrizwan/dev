@@ -1,5 +1,6 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   Avatar,
   Button,
@@ -15,22 +16,23 @@ import {
 import MuiAlert from '@mui/material/Alert';
 import { initializeApp } from 'firebase/app';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
-import firebaseConfig from '../../constants/firebaseConfig'
+import firebaseConfig from '../../constants/firebaseConfig';
 import axios from 'axios';
 
 export default function SignInSide() {
   const theme = useTheme();
-  const [details, setDetails] = React.useState({
+  const [details, setDetails] = useState({
     email: '',
     password: '',
   });
-  const [error, setError] = React.useState(null);
-  const [emailError, setEmailError] = React.useState(null);
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState('');
+  const [error, setError] = useState(null);
+  const [emailError, setEmailError] = useState(null);
+  const [snackbarSeverity, setSnackbarSeverity] = useState('');
   const [loginImages, setLoginImages] = React.useState({
     login_l: '',
     login_d: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const { email, password } = details;
 
@@ -50,7 +52,7 @@ export default function SignInSide() {
   const loadLoginImages = async () => {
     try {
       const app = initializeApp(firebaseConfig);
-      const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
+      const storage = getStorage(app, 'gs://parksense-82db2.appspot.com');
 
       const login_l_url = await getDownloadURL(ref(storage, 'LoginPage/login_l.png'));
       const login_d_url = await getDownloadURL(ref(storage, 'LoginPage/login_d.png'));
@@ -64,7 +66,7 @@ export default function SignInSide() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadLoginImages();
   }, []);
 
@@ -77,34 +79,32 @@ export default function SignInSide() {
       return;
     }
 
+    setLoading(true);
+
     try {
       const response = await axios.post('http://localhost:8000/login', details);
-      console.log(details)
       localStorage.setItem('token', response.data.token);
-      const userName =
-        response.data.role.toUpperCase() === 'LOTOWNER'
-          ? response.data.Details.Name
-          : response.data.Details.FirstName + " " + response.data.Details.LastName;
 
-      localStorage.setItem('userName', userName);
-      localStorage.setItem('userRole', response.data.role.toUpperCase());
-
-      if (response.data.role.toUpperCase() === 'CAROWNER') {
+      const [payload] = response.data.token.split('.').slice(1, 2);
+      const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      if (decodedPayload.role.toUpperCase() === 'CAROWNER') {
         window.location.assign(`/car/dashboard`);
-      } else if (response.data.role.toUpperCase() === 'LOTOWNER') {
+      } else if (decodedPayload.role.toUpperCase() === 'LOTOWNER') {
         window.location.assign(`/lot/dashboard`);
       } else {
         window.location.assign(`/admin/dashboard`);
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        setSnackbarSeverity('error')
+        setSnackbarSeverity('error');
         setError(error.response.data.message || 'Invalid Credentials.');
       } else {
-        setSnackbarSeverity('error')
+        setSnackbarSeverity('error');
         setError('An error occurred during login.');
         console.error(error);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,7 +116,8 @@ export default function SignInSide() {
         sm={4}
         md={7}
         sx={{
-          backgroundImage: `url(${theme.palette.mode === 'dark' ? loginImages.login_d : loginImages.login_l})`,
+          backgroundImage: `url(${theme.palette.mode === 'dark' ? loginImages.login_d : loginImages.login_l
+            })`,
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -137,7 +138,6 @@ export default function SignInSide() {
             <Avatar sx={{ m: 1, bgcolor: theme.palette.primary.main }}>
               <LockOutlinedIcon />
             </Avatar>
-
 
             <Typography variant="h4" color="text.primary">
               Log in to your account
@@ -197,7 +197,7 @@ export default function SignInSide() {
               variant="contained"
               sx={{ mt: 3, mb: 2, backgroundColor: theme.palette.primary.main }}
             >
-              Log In
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
             </Button>
             <Grid container>
               <Grid item>
@@ -224,4 +224,3 @@ export default function SignInSide() {
     </Grid>
   );
 }
-
