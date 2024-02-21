@@ -42,7 +42,7 @@ exports.lotOwnerRegister = async (lotOwner, password) => {
     return;
   }
 };
-exports.carOwnerRegister = async (carOwner, password) => {
+exports.carOwnerRegister = async (carOwner, avatar, password) => {
   try {
     // let pool = await mssql.connect(config);
     let poolS = await pool;
@@ -60,9 +60,10 @@ exports.carOwnerRegister = async (carOwner, password) => {
       .input("country", sql.VarChar, carOwner.country)
       .input("coins", sql.Decimal, carOwner.coins)
       .input("password", sql.VarChar, password)
+      .input("avatar", sql.TinyInt, avatar)
       .query(
         `exec registercarOwner @role, @email, @firstName, @lastName, @gender, @dob,
-        @phoneNo, @city, @country, @coins, @password`
+        @phoneNo, @city, @country, @coins, @password, @avatar`
       );
     return "Success";
   } catch (error) {

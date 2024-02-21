@@ -3,6 +3,9 @@ export const years = Array.from(
   { length: new Date().getFullYear() - 1900 },
   (_, i) => new Date().getFullYear() - i
 );
+export const minAvatarLimit = 1;
+export const maxAvatarLimit = 8;
+
 export const colors = [
   "White",
   "Silver",
@@ -21,17 +24,10 @@ export const types = [
   "Van",
   "Motorbike",
   "Convertible",
-  "Others"
+  "Others",
 ];
 
-export const makes = [
-  "Toyota",
-  "Honda",
-  "Ford",
-  "Chevrolet",
-  "BMW",
-  "Others"
-];
+export const makes = ["Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Others"];
 // export const fieldNames = [
 //   "title",
 //   "salary",

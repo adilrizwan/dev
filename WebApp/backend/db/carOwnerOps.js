@@ -12,20 +12,20 @@ exports.viewVehicles = async (ID, offset, pageSize) => {
       .input("offset", sql.Int, offset)
       .input("pageSize", sql.Int, pageSize)
       .query(`EXEC ViewVehicles @ID, @offset, @pageSize`);
-      const fetched = await paginate.resultCount(
-        offset,
-        query.recordsets[1].length,
-        query.recordsets[0].TOTAL
-      );
-      return {
-        Results:
-          "Showing " +
-          fetched +
-          " of " +
-          query.recordsets[0][0].TOTAL +
-          " results",
-        MyVehicles: query.recordsets[1],
-      };
+    const fetched = await paginate.resultCount(
+      offset,
+      query.recordsets[1].length,
+      query.recordsets[0].TOTAL
+    );
+    return {
+      Results:
+        "Showing " +
+        fetched +
+        " of " +
+        query.recordsets[0][0].TOTAL +
+        " results",
+      MyVehicles: query.recordsets[1],
+    };
   } catch (error) {
     console.log(error);
     res.status(400).json({ "DB ERROR": error });
@@ -53,30 +53,35 @@ exports.updateProfile = async (ID, post) => {
     const request = query.request();
     const result = await request
       .input("ID", sql.Int, ID)
-      .input("FirstName", sql.VarChar, post.FirstName) 
-      .input("LastName", sql.VarChar, post.LastName) 
-      .input("Gender", sql.VarChar, post.Gender) 
-      .input("DOB", sql.Date, post.DOB) 
-      .input("City", sql.VarChar, post.City) 
-      .input("Country", sql.VarChar, post.Country) 
+      .input("FirstName", sql.VarChar, post.FirstName)
+      .input("LastName", sql.VarChar, post.LastName)
+      .input("Gender", sql.VarChar, post.Gender)
+      .input("DOB", sql.Date, post.DOB)
+      .input("City", sql.VarChar, post.City)
+      .input("Country", sql.VarChar, post.Country)
       .input("PhoneNo", sql.VarChar, post.PhoneNo)
-      .query(`IF EXISTS (SELECT 1 FROM CarOwner WHERE ID = @ID)
-            BEGIN
-                UPDATE CarOwner SET 
-                    FirstName = @FirstName,  
-                    LastName = @LastName,  
-                    Gender = @Gender,  
-                    DOB = @DOB,  
-                    City = @City,  
-                    Country = @Country,  
-                    PhoneNo = @PhoneNo 
-                WHERE ID = @ID;
-                SELECT 1;
-            END
-            ELSE
-            BEGIN
-                SELECT 0;
-            END`);
+      .input("AvatarID", sql.TinyInt, post.AvatarID)
+      .query(
+        `EXEC UpdateCarOwnerProfile @ID, @FirstName, @LastName, @Gender, @DOB, @City, @Country, @PhoneNo, @AvatarID`
+      );
+    // .query(`IF EXISTS (SELECT 1 FROM CarOwner WHERE ID = @ID)
+    //       BEGIN
+    //           UPDATE CarOwner SET
+    //               FirstName = @FirstName,
+    //               LastName = @LastName,
+    //               Gender = @Gender,
+    //               DOB = @DOB,
+    //               City = @City,
+    //               Country = @Country,
+    //               PhoneNo = @PhoneNo
+    //           WHERE ID = @ID;
+    //           SELECT 1;
+    //       END
+    //       ELSE
+    //       BEGIN
+    //           SELECT 0;
+    //       END`);
+    console.log(result.recordset);
     if (result.recordset[0][""] === 0) {
       return 0;
     } else if (result.recordset[0][""] === 1) {
@@ -97,7 +102,7 @@ exports.addCar = async (ID, post) => {
     const request = query.request();
     const result = await request
       .input("ID", sql.Int, ID)
-      .input("RegistrationNumber", sql.VarChar, post.RegNo.toUpperCase()) 
+      .input("RegistrationNumber", sql.VarChar, post.RegNo.toUpperCase())
       .input("Make", sql.VarChar, post.Make)
       .input("Model", sql.VarChar, post.Model)
       .input("RegYear", sql.Int, post.RegYear)
@@ -105,7 +110,9 @@ exports.addCar = async (ID, post) => {
       .input("Type", sql.VarChar, post.Type)
       .input("RegisteredCountry", sql.VarChar, post.RegisteredCountry)
       .input("RegisteredCity", sql.VarChar, post.RegisteredCity)
-      .query(`EXEC AddCar @ID, @RegistrationNumber, @Make, @Model, @RegYear, @Color, @Type, @RegisteredCountry, @RegisteredCity`);
+      .query(
+        `EXEC AddCar @ID, @RegistrationNumber, @Make, @Model, @RegYear, @Color, @Type, @RegisteredCountry, @RegisteredCity`
+      );
     if (result.recordset[0][""] === 0) {
       return 0;
     } else if (result.recordset[0][""] === 1) {
@@ -126,8 +133,8 @@ exports.deleteCar = async (OwnerID, RegNo) => {
     const request = query.request();
     const result = await request
       .input("OwnerID", sql.Int, OwnerID)
-      .input("RegNo", sql.VarChar, RegNo) 
-      // .input("Status", sql.VarChar, post.Status) 
+      .input("RegNo", sql.VarChar, RegNo)
+      // .input("Status", sql.VarChar, post.Status)
       .query(`EXEC DeleteCar @OwnerID, @RegNo`);
     if (result.recordset[0][""] === 0) {
       return 0;

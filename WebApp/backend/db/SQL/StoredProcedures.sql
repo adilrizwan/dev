@@ -45,11 +45,13 @@ create proc registerCarOwner
 @city varchar(50),
 @country varchar(50),
 @coins decimal(10,2),
-@password varchar(MAX)
+@password varchar(MAX),
+@avatar tinyint
 as
 begin
 insert into Credentials (Email,Password,UserRole) values (@email, @password, @role)
 insert into CarOwner (FirstName, LastName, Gender, DOB, PhoneNo, Email, City, Country ,Coins) values (@firstName, @lastName, @gender, @dob, @phoneNo, @email, @city, @country, @coins)
+insert into UserAvatar (Email, AvatarID) values (@email, @avatar);
 end
 go
 -----------------------------------------------------
@@ -78,8 +80,12 @@ BEGIN
 	Declare @sql nvarchar(MAX)
 	SET @sql = N'SELECT * FROM ' + QUOTENAME(@UserRole) + ' WHERE Email = @Email';
     EXEC sp_executesql @Sql, N'@Email NVARCHAR(255)', @Email;
+
+	SELECT AvatarID from UserAvatar WHERE Email = @Email;
 END
 go
+
+drop proc GetDetails
 ----------------------------------------------------------------------
 --Admin Search
 go
@@ -361,8 +367,54 @@ BEGIN
     END
 END
 -----------------------------------------------------------------------------------
+CREATE PROCEDURE UpdateCarOwnerProfile
+    @ID INT,
+    @FirstName NVARCHAR(50),
+    @LastName NVARCHAR(50),
+    @Gender NVARCHAR(10),
+    @DOB DATE,
+    @City NVARCHAR(50),
+    @Country NVARCHAR(50),
+    @PhoneNo NVARCHAR(20),
+    @AvatarID TINYINT
+
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Email VARCHAR(255);
+
+    -- Get email from CarOwner table using the provided ID
+    SELECT @Email = Email FROM CarOwner WHERE ID = @ID;
+
+    IF @Email IS NULL
+    BEGIN
+        -- Handle if the provided ID does not exist in CarOwner table
+        RAISERROR ('CarOwner with ID %d does not exist.', 16, 1, @ID);
+        RETURN -1;
+    END
+
+    -- Update CarOwner table
+    UPDATE CarOwner SET 
+        FirstName = @FirstName,  
+        LastName = @LastName,  
+        Gender = @Gender,  
+        DOB = @DOB,  
+        City = @City,  
+        Country = @Country,  
+        PhoneNo = @PhoneNo 
+    WHERE ID = @ID;
+
+    -- Update AvatarID in UserAvatar table using the retrieved email
+    UPDATE UserAvatar
+    SET AvatarID = @AvatarID
+    WHERE Email = @Email;
+
+    SELECT 1; -- Return 1 for success
+END
 
 -----------------------------------------------------------------------------------
 select * from Car_Audit
-select * from Car
+select * from CarOwner
+select * from UserAvatar
 

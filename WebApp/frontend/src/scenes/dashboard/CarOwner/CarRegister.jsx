@@ -88,7 +88,6 @@ export default function CarRegister() {
             setSnackbarSeverity('warning');
             setSnackbarMessage('Passwords do not match.');
         } else {
-            console.log(details);
             axios
                 .post('http://localhost:8000/car/register', details)
                 .then(() => {

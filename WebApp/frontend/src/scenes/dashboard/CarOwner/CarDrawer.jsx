@@ -45,28 +45,26 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-const avatarSelect = await getRandomInt(1, 8);
-const filePath = 'avatars/' + avatarSelect + '.jpg'
-
-
 export default function SideBar({ onTabClick }) {
     const theme = useTheme();
+    const jwtToken = localStorage.getItem('token');
     const isScreenSmall = useMediaQuery(theme.breakpoints.down(700));
     const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {
         setOpen(!open);
     };
     const [avatarUrl, setAvatarUrl] = useState(null);
+    const [payload] = jwtToken.split('.').slice(1, 2);
+
+    const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    const filePath = 'avatars/' + decodedPayload.avatar + '.jpg'
+
     useEffect(() => {
         const imageRef = ref(storage, filePath);
         getDownloadURL(imageRef)
             .then((url) => setAvatarUrl(url))
             .catch((error) => console.error("Error getting download URL:", error));
-    }, []);
+    }, [filePath]);
     return (
         <ThemeProvider theme={theme}>
             <Drawer variant="permanent" open={!isScreenSmall && open}>
@@ -106,7 +104,7 @@ export default function SideBar({ onTabClick }) {
                                 fontWeight="bold"
                                 sx={{ m: "10px 0 0 0" }}
                             >
-                                {localStorage.getItem('userName')}
+                                {decodedPayload.name}
                             </Typography>
                         </Box>
                         <Box textAlign="center">

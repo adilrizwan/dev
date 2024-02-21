@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Grid, Box, Button, Typography, TextField, Alert, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Grid, Box, Button, Typography, TextField, CircularProgress, Alert, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { margins } from '../../../constants/theme';
 import { genderArr } from '../../../constants/Menus';
 import { TextMaskCustomReg } from '../../../constants/phoneNumber';
 import { countries } from '../../../constants/countries';
-import { useEffect } from 'react';
+import ImageSlider from '../../../components/ImageSlider';
 
 export default function CarProfile() {
     const token = localStorage.getItem('token');
-    const [data, setData] = React.useState({
+    const [data, setData] = useState({
         FirstName: '',
         LastName: '',
         Gender: '',
@@ -17,10 +17,11 @@ export default function CarProfile() {
         City: '',
         Country: '',
         PhoneNo: '',
+        AvatarID: 0
     });
-
-    const [snackbarSeverity, setSnackbarSeverity] = React.useState('success');
-    const [snackbarMessage, setSnackbarMessage] = React.useState('');
+    const [loading, setLoading] = useState(false);
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,32 +46,37 @@ export default function CarProfile() {
         setData((prevState) => ({ ...prevState, [name]: value }));
     };
 
-    const onSubmit = (event) => {
+    const handleImageSelect = (fileNameWithoutExtension) => {
+        const avatarID = parseInt(fileNameWithoutExtension);
+        setData((prevState) => ({ ...prevState, AvatarID: avatarID }));
+    };
+
+    const onSubmit = async (event) => {
         event.preventDefault();
-        axios
-            .put('http://localhost:8000/car/profile', data, {
+        setLoading(true);
+        try {
+            await axios.put('http://localhost:8000/car/profile', data, {
                 headers: {
                     Authorization: `${token}`,
                 },
-            })
-            .then(() => {
-                setSnackbarSeverity('success');
-                setSnackbarMessage('Your information has been updated!');
-
-                setTimeout(() => {
-                    setSnackbarMessage('');
-                }, 5000);
-            })
-            .catch((error) => {
-                if (error.request && error.request.response && error.request.response.status === 403) {
-                    setSnackbarSeverity('info');
-                    setSnackbarMessage('Update failed. Please try again.');
-                } else {
-                    setSnackbarSeverity('error');
-                    setSnackbarMessage((error.response?.data?.message || 'Unknown error'));
-                    console.log(error);
-                }
             });
+            setSnackbarSeverity('success');
+            setSnackbarMessage('Your information has been updated!');
+            setTimeout(() => {
+                setSnackbarMessage('');
+            }, 5000);
+        } catch (error) {
+            if (error.request && error.request.response && error.request.response.status === 403) {
+                setSnackbarSeverity('info');
+                setSnackbarMessage('Update failed. Please try again.');
+            } else {
+                setSnackbarSeverity('error');
+                setSnackbarMessage((error.response?.data?.message || 'Unknown error'));
+                console.log(error);
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -86,8 +92,21 @@ export default function CarProfile() {
                         </Alert>
                     )}
                     <Paper elevation={3} sx={{ p: 4, ...margins }}>
+                        <Typography align='left' variant="h4" gutterBottom>
+                            Update Avatar
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontStyle: 'italic' }} gutterBottom>
+                            Changes to your avatar will be applied the next time you log in.
+                        </Typography>
+
+                        <Box p={2}>
+                            <ImageSlider avatarCount={8} onImageSelect={handleImageSelect} />
+                        </Box>
+                        <Typography align='left' variant="h4" sx={{ mb: 4 }} gutterBottom>
+                            Update Details
+                        </Typography>
                         <form onSubmit={onSubmit}>
-                            <Grid container spacing={2} justifyContent="center">
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} sm={6}>
                                     <TextField
                                         fullWidth
@@ -189,8 +208,9 @@ export default function CarProfile() {
                                         fullWidth
                                         variant="contained"
                                         color="primary"
+                                        disabled={loading}
                                     >
-                                        Update
+                                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Update'}
                                     </Button>
                                 </Grid>
                             </Grid>
