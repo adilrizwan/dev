@@ -31,7 +31,7 @@ export default function CarSupport() {
             <Grid item xs={12} md={8}>
                 <Box p={2}>
                     <Typography align='left' variant="h2" gutterBottom>
-                        Help
+                        Support
                     </Typography>
                     {snackbarMessage && (
                         <Alert severity={snackbarSeverity} sx={{ width: '100%', mb: 2 }}>
