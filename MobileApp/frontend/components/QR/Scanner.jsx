@@ -19,9 +19,6 @@ const Scanner = ({ navigation }) => {
             });
         }, 1000);
 
-        // navigation.navigate('SessionStart', {
-        //     result: "ur mom",
-        // });
     }
 
     const styles = StyleSheet.create({
@@ -47,6 +44,28 @@ const Scanner = ({ navigation }) => {
             fontSize: 24,
             fontWeight: 'bold',
             color: 'white',
+        },
+        barcodeGuideline: {
+            width: 40, // Adjust for desired size
+            height: 0, // Adjust for desired size
+            borderWidth: 2,
+            borderColor: 'white',
+            borderRadius: 20,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            // marginTop: 'auto',
+            // marginBottom: 'auto'
+        },
+        barcodeGuideline1: {
+            width: 0, // Adjust for desired size
+            height: 40, // Adjust for desired size
+            borderWidth: 2,
+            borderColor: 'white',
+            borderRadius: 20,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            marginTop: 'auto',
+            marginBottom: 'auto'
         },
     });
 
@@ -75,7 +94,38 @@ const Scanner = ({ navigation }) => {
                 }}
                 onBarcodeScanned={scanned ? undefined : scanHandler}
             >
+                <View style={{ flexDirection: 'row', marginTop: 90, marginHorizontal:-60 }}>
 
+                    <View style={styles.barcodeGuideline} />
+                    <View style={styles.barcodeGuideline} />
+
+                </View>
+                <View style={{ flexDirection: 'row', marginTop: -4, marginHorizontal: -100 }}>
+
+                    <View style={styles.barcodeGuideline1} />
+                    <View style={styles.barcodeGuideline1} />
+
+                </View>
+
+
+                <View style={{ flexDirection: 'row', marginTop: 200, marginHorizontal: -100 }}>
+
+                    <View style={styles.barcodeGuideline1} />
+                    <View style={styles.barcodeGuideline1} />
+
+                </View>
+                <View style={{ flexDirection: 'row', marginTop: -4, marginHorizontal:-60 }}>
+
+                    <View style={styles.barcodeGuideline} />
+                    <View style={styles.barcodeGuideline} />
+
+                </View>
+                {/* <View style={styles.container1}> */}
+                {/* <View style={styles.topLeft} /> */}
+                {/* <View style={styles.topRight} /> */}
+                {/* <View style={styles.bottomRight} /> */}
+                {/* <View style={styles.bottomLeft} /> */}
+                {/* </View> */}
             </CameraView>
         </View>
     )
