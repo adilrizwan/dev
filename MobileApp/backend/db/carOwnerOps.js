@@ -319,13 +319,13 @@ exports.getLotInfo = async () => {
                 CONCAT(Lot.AddressL1, ', ', Lot.AddressL2, ', ', Lot.City, ', ', Lot.Country) AS Location,
                 Lot.TotalZones AS TotalZones,
                 SUM(LotZone.capacity) AS TotalLotCapacity,
-                SUM(LotZone.capacity - LotZone.available) AS TotalLotOccupied,
-                SUM(LotZone.available) AS TotalLotAvailability,
+                SUM(LotZone.capacity - ISNULL(LotZone.available, 0)) AS TotalLotOccupied,
+                SUM(ISNULL(LotZone.available, 0)) AS TotalLotAvailability,
                 (
                   SELECT 
                     CONCAT('[', 
                       STRING_AGG(
-                        CONCAT('{"ZoneID": ', LotZone.ZoneID, ', "Capacity": ', LotZone.capacity, ', "Available": ', LotZone.available, '}'),
+                        CONCAT('{"ZoneID": ', LotZone.ZoneID, ', "Capacity": ', LotZone.capacity, ', "Available": ', ISNULL(LotZone.available, 0), '}'),
                         ', '
                       ), 
                       ']'
@@ -347,4 +347,5 @@ exports.getLotInfo = async () => {
     throw error;
   }
 };
+
 
