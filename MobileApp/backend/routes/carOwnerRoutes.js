@@ -9,6 +9,9 @@ router.get('/current', auth, carOwnerController.getCurrentParkingSessions);
 router.get('/past', auth, carOwnerController.getPastParkingSessions);
 router.get('/all', auth, carOwnerController.getAllParkingSessions);
 router.get("/profile", auth, carOwnerController.getProfile)
+router.get("/recent", auth, carOwnerController.getRecentParkingLots)
+router.get("/frequent", auth, carOwnerController.getFrequentParkingLots)
+router.get("/lotinfo", auth, carOwnerController.getLotInfo)
 router.put("/profile", auth , carOwnerController.updateProfile)
 router.post("/", auth , carOwnerController.addCar)
 router.post("/support", auth , carOwnerController.support)

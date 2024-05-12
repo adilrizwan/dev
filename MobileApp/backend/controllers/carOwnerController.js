@@ -155,15 +155,19 @@ exports.startParkingSession = async (req, res) => {
   }
 };
 
+// Controller function
 exports.endParkingSession = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
-      const { carRegNo, charge } = req.body;
+      const { carRegNo } = req.body;
       const outTime = new Date(); 
       const dayOut = outTime.getDate(); 
-      const result = await carOwnerOps.endSession(carRegNo, outTime, dayOut, charge);
-      if (result.rowsAffected[0] > 0) {
-        res.json({ message: "Parking session ended successfully" });
+      
+      // Call the endSession function to calculate charges and update ParkingSession
+      const { rowsAffected, charge } = await carOwnerOps.endSession(carRegNo, outTime, dayOut);
+      
+      if (rowsAffected > 0) {
+        res.json({ message: "Parking session ended successfully", charge });
       } else {
         res.status(404).json({ message: "Parking session not found or already ended" });
       }
@@ -175,6 +179,7 @@ exports.endParkingSession = async (req, res) => {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+
 
 exports.getCurrentParkingSessions = async (req, res) => {
   console.log("User object:", req.user); 
@@ -210,5 +215,51 @@ exports.getAllParkingSessions = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user's all parking sessions" });
   }
 };
+
+exports.getRecentParkingLots = async (req, res) => {
+  if (req.user.role === "CAROWNER") {
+    try {
+      const userID = req.user.id;
+      const { limit } = req.body || 5; // Default limit to 5 if not specified
+      
+      const recentParkingLots = await carOwnerOps.getRecentParkingLots(userID, limit);
+      res.json(recentParkingLots);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Failed to fetch recent parking lots", error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+exports.getFrequentParkingLots = async (req, res) => {
+  if (req.user.role === "CAROWNER") {
+    try {
+      const userID = req.user.id;
+      const limit = req.body.limit || 5; 
+      
+      const frequentParkingLots = await carOwnerOps.getFrequentParkingLots(userID, limit);
+      res.json(frequentParkingLots);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Failed to fetch frequent parking lots", error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+exports.getLotInfo = async (req, res) => {
+  try {
+    const lotInfo = await carOwnerOps.getLotInfo();
+    res.json(lotInfo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to fetch lot information", error: error.message });
+  }
+};
+
+
 
 
