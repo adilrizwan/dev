@@ -178,10 +178,30 @@ exports.startSession = async (carRegNo, lotID, inTime, dayIn) => {
 };
 
 
-exports.endSession = async (carRegNo, outTime, dayOut, charge) => {
+exports.endSession = async (carRegNo, outTime, dayOut) => {
   try {
     let poolS = await pool;
-    let query = await poolS
+    let queryInTime = await poolS
+      .request()
+      .input("CarRegNo", sql.VarChar(10), carRegNo)
+      .query(`SELECT InTime FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
+    const inTime = queryInTime.recordset[0].InTime;
+    
+    const durationInMs = outTime.getTime() - new Date(inTime).getTime();
+    const durationInHours = durationInMs / (1000 * 60 * 60);
+    
+    let queryHourlyRate = await poolS
+      .request()
+      .input("CarRegNo", sql.VarChar(10), carRegNo)
+      .query(`SELECT * FROM HourlyRate WHERE LotID IN (SELECT LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo)`);
+    const hourlyRate = queryHourlyRate.recordset[0]; 
+
+    let charge = 0;
+    for (let i = 0; i < 24; i++) {
+      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours / i);
+    }
+
+    let queryUpdate = await poolS
       .request()
       .input("CarRegNo", sql.VarChar(10), carRegNo)
       .input("OutTime", sql.DateTime, outTime)
@@ -190,12 +210,14 @@ exports.endSession = async (carRegNo, outTime, dayOut, charge) => {
       .query(`UPDATE ParkingSession 
               SET OutTime = @OutTime, DayOut = @DayOut, Charge = @Charge 
               WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
-    return query;
+
+    return { rowsAffected: queryUpdate.rowsAffected[0], charge };
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
+
 
 exports.getCurrentSessions = async (userID) => {
   try {
@@ -248,3 +270,81 @@ exports.getAllSessions = async (userID) => {
     throw error;
   }
 };
+
+exports.getRecentParkingLots = async (userID, limit) => {
+  try {
+    let poolS = await pool;
+    let query = await poolS
+      .request()
+      .input("UserID", sql.Int, userID)
+      .input("Limit", sql.Int, limit)
+      .query(`SELECT DISTINCT TOP (@Limit) LotID, InTime
+      FROM ParkingSession 
+      WHERE CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
+      ORDER BY InTime DESC
+      `);
+    return query.recordset;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+exports.getFrequentParkingLots = async (userID, limit) => {
+  try {
+    let poolS = await pool;
+    let query = await poolS
+      .request()
+      .input("UserID", sql.Int, userID)
+      .input("Limit", sql.Int, limit)
+      .query(`SELECT TOP (@Limit) LotID, COUNT(*) AS Visits
+              FROM ParkingSession
+              WHERE CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
+              GROUP BY LotID
+              ORDER BY Visits DESC`);
+    return query.recordset;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+exports.getLotInfo = async () => {
+  try {
+    let poolS = await pool;
+    let query = await poolS
+      .request()
+      .query(`SELECT 
+                Lot.LotID,
+                CONCAT(Lot.AddressL1, ', ', Lot.AddressL2, ', ', Lot.City, ', ', Lot.Country) AS Location,
+                Lot.TotalZones AS TotalZones,
+                SUM(LotZone.capacity) AS TotalLotCapacity,
+                SUM(LotZone.capacity - LotZone.available) AS TotalLotOccupied,
+                SUM(LotZone.available) AS TotalLotAvailability,
+                (
+                  SELECT 
+                    CONCAT('[', 
+                      STRING_AGG(
+                        CONCAT('{"ZoneID": ', LotZone.ZoneID, ', "Capacity": ', LotZone.capacity, ', "Available": ', LotZone.available, '}'),
+                        ', '
+                      ), 
+                      ']'
+                    )
+                  FROM 
+                    LotZone 
+                  WHERE 
+                    LotZone.LotID = Lot.LotID
+                ) AS ZoneDetails
+              FROM 
+                Lot
+              LEFT JOIN 
+                LotZone ON Lot.LotID = LotZone.LotID
+              GROUP BY 
+                Lot.LotID, Lot.AddressL1, Lot.AddressL2, Lot.City, Lot.Country, Lot.TotalZones`);
+    return query.recordset;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
