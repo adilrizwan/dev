@@ -1,7 +1,9 @@
 import React from 'react'
-import { CameraView, useCameraPermissions } from 'expo-camera/next';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+
+import * as Keychain from "react-native-keychain";
 
 const Scanner = ({ navigation }) => {
 

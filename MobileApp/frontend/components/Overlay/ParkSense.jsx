@@ -19,7 +19,8 @@ const ParkSense = () => {
                     style={{
                         resizeMode: 'center',
                         height: 100,
-                        width: 180,
+                        width: 250,
+                        marginBottom:20
                     }} />
             </Appbar.Header>
             <Divider style={{height:0.4}}/>
