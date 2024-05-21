@@ -14,6 +14,7 @@ import firebaseConfig from '../../../constants/firebaseConfig'
 import CarSupport from './CarSupport';
 import CarProfile from './CarProfile';
 import CarView from './CarView';
+import CarHistory from './CarHistory';
 
 const drawerWidth = 240;
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -138,7 +139,7 @@ const CarDrawerList = ({ onTabClick }) => (
         <Divider sx={{ mx: 2 }} />
 
         {/* <Divider /> */}
-        <ListItemButton>
+        <ListItemButton onClick={() => onTabClick(<CarHistory />)}>
             <ListItemIcon>
                 <HistoryIcon />
             </ListItemIcon>

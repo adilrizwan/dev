@@ -137,3 +137,45 @@ exports.deleteCar = async (req, res) => {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+
+exports.getHistory = async (req, res) => {
+  if (req.user.role === "CAROWNER") {
+    try {
+      const userID = req.user.id;
+      const pastSessions = await carOwnerOps.getHistory(userID);
+
+      // Calculate and format duration for each session
+      const sessionsWithDuration = pastSessions.map((session) => {
+        const inTime = new Date(session.InTime);
+        const outTime = new Date(session.OutTime);
+        const durationInMilliseconds = outTime - inTime;
+
+        let duration;
+        if (durationInMilliseconds < 3600000) {
+          // Less than 1 hour (60 * 60 * 1000)
+          duration = Math.ceil(durationInMilliseconds / (1000 * 60)); // Convert milliseconds to minutes
+          duration = duration + " mins";
+        } else {
+          const hours = Math.floor(durationInMilliseconds / (1000 * 60 * 60)); // Convert milliseconds to hours
+          const minutes = Math.ceil(
+            (durationInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
+          ); // Remaining minutes
+          duration = hours + " hr " + minutes + " mins";
+        }
+
+        return {
+          ...session,
+          Duration: duration,
+        };
+      });
+
+      res.json(sessionsWithDuration);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};

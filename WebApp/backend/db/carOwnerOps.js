@@ -64,24 +64,6 @@ exports.updateProfile = async (ID, post) => {
       .query(
         `EXEC UpdateCarOwnerProfile @ID, @FirstName, @LastName, @Gender, @DOB, @City, @Country, @PhoneNo, @AvatarID`
       );
-    // .query(`IF EXISTS (SELECT 1 FROM CarOwner WHERE ID = @ID)
-    //       BEGIN
-    //           UPDATE CarOwner SET
-    //               FirstName = @FirstName,
-    //               LastName = @LastName,
-    //               Gender = @Gender,
-    //               DOB = @DOB,
-    //               City = @City,
-    //               Country = @Country,
-    //               PhoneNo = @PhoneNo
-    //           WHERE ID = @ID;
-    //           SELECT 1;
-    //       END
-    //       ELSE
-    //       BEGIN
-    //           SELECT 0;
-    //       END`);
-    console.log(result.recordset);
     if (result.recordset[0][""] === 0) {
       return 0;
     } else if (result.recordset[0][""] === 1) {
@@ -146,5 +128,21 @@ exports.deleteCar = async (OwnerID, RegNo) => {
   } catch (error) {
     console.log(error);
     res.status(400).json({ "DB ERROR": error });
+  }
+};
+exports.getHistory = async (userID) => {
+  try {
+    let poolS = await pool;
+    let query = await poolS.request().input("UserID", sql.Int, userID)
+      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model, l.LotName
+      FROM ParkingSession ps
+      INNER JOIN Car c ON ps.CarID = c.CarID
+      INNER JOIN Lot l ON ps.LotID = l.LotID
+      WHERE c.OwnerID = @UserID AND ps.OutTime IS NOT NULL;
+      `);
+    return query.recordset;
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 };

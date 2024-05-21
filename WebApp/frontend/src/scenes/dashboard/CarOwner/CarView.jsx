@@ -465,11 +465,15 @@ export default function CarView() {
                                             <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
                                                 <Badge
                                                     variant="dot"
-                                                    color={car.Status === 'ACTIVE' ? 'green' : 'yellow'}
+                                                    color={car.Status === 'ACTIVE' ? 'success' : car.Status === 'INACTIVE' ? 'error' : 'warning'}
                                                     sx={{
                                                         height: 5,
+                                                        width: 5,
+                                                        borderRadius: '50%',
+                                                        backgroundColor: car.Status === 'ACTIVE' ? 'success.main' : car.Status === 'INACTIVE' ? 'error.main' : 'warning.main',
                                                     }}
                                                 />
+
                                                 <Typography variant="subtitle" gutterBottom sx={{ ml: 1 }}>
                                                     {car.Status}
                                                 </Typography>
