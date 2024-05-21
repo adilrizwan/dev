@@ -80,7 +80,6 @@ export default function LotOwnerRegister() {
             setSnackbarSeverity('warning');
             setSnackbarMessage('Passwords do not match.');
         } else {
-            console.log(details);
             axios
                 .post('http://localhost:8000/lot/register', details)
                 .then(() => {
@@ -152,8 +151,8 @@ export default function LotOwnerRegister() {
                                     margin="normal"
                                 />
 
-                                <Grid container spacing={2}> 
-                                    
+                                <Grid container spacing={2}>
+
                                     <Grid item xs={12} md={6}>
                                         <TextField
                                             name="password"
@@ -173,7 +172,7 @@ export default function LotOwnerRegister() {
                                             }
                                         />
                                     </Grid>
-                                    
+
                                     <Grid item xs={12} md={6}>
                                         <TextField
                                             name="password2"
@@ -197,8 +196,8 @@ export default function LotOwnerRegister() {
                                     </Grid>
                                 </Grid>
 
-                                <Grid container spacing={2}> 
-                                    
+                                <Grid container spacing={2}>
+
                                     <Grid item xs={12} md={6}>
                                         <FormControl fullWidth variant="standard">
                                             <InputLabel htmlFor="formatted-text-mask-input">Phone Number</InputLabel>

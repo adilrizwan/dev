@@ -1,35 +1,16 @@
 import * as React from 'react';
 import { useTheme, Box, ThemeProvider, Container, Grid } from '@mui/material';
 import SideBar from './LotDrawer';
+import LotView from './LotView';
 
 export default function LotDashboard() {
   const theme = useTheme();
-  // const [currentComponent, setCurrentComponent] = React.useState(<JobsApplied />);
-
-  // const handleProfileClick = () => {
-  //   setCurrentComponent(<ProfileApplicant />);
-  // };
-  // const handleDashboardClick = () => {
-  //   setCurrentComponent(<JobsApplied />);
-  // };
-  // const handleSearchClick = () => {
-  //   setCurrentComponent(<FindJobs />);
-  // };
-  // const handleCVClick = () => {
-  //   setCurrentComponent(<DownloadCV />);
-  // };
+  const [currentComponent, setCurrentComponent] = React.useState(<LotView />);
 
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
-        <Grid>
-          <SideBar
-          // onDashboardClick={handleDashboardClick}
-          // onUpdateProfileClick={handleProfileClick}
-          // onSearchClick={handleSearchClick}
-          // onCVClick={handleCVClick}
-          />
-        </Grid>
+          <SideBar onTabClick={setCurrentComponent} />
         <Box
           component="main"
           sx={{
@@ -42,9 +23,8 @@ export default function LotDashboard() {
           }}
         >
           <Container sx={{ mt: 3 }}>
-
             <Grid>
-              {/* {currentComponent} */}
+              {currentComponent}
             </Grid>
           </Container>
         </Box>
