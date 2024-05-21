@@ -12,6 +12,8 @@ router.get("/profile", auth, carOwnerController.getProfile)
 router.get("/recent", auth, carOwnerController.getRecentParkingLots)
 router.get("/frequent", auth, carOwnerController.getFrequentParkingLots)
 router.get("/lotinfo", auth, carOwnerController.getLotInfo)
+router.get('/coins', auth, carOwnerController.getUserCoins);
+router.get('/transactions', auth, carOwnerController.getUserTransactionHistory);
 router.put("/profile", auth , carOwnerController.updateProfile)
 router.post("/", auth , carOwnerController.addCar)
 router.post("/support", auth , carOwnerController.support)

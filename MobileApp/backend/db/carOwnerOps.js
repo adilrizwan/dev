@@ -1,6 +1,8 @@
 const sql = require("mssql");
 const { pool } = require("./sqlConfig");
 const paginate = require("../middleware/pagination");
+const carOwnerOps = require('./carOwnerOps'); 
+
 
 exports.viewVehicles = async (ID, offset, pageSize) => {
   try {
@@ -149,10 +151,10 @@ exports.deleteCar = async (OwnerID, RegNo) => {
   }
 };
 
-exports.startSession = async (carRegNo, lotID, inTime, dayIn) => {
+exports.startSession = async (carRegNo, lotID, inTime, dayIn, userId) => {
   try {
     let poolS = await pool;
-    
+
     const ongoingSessionQuery = await poolS
       .request()
       .input("CarRegNo", sql.VarChar(10), carRegNo)
@@ -161,7 +163,12 @@ exports.startSession = async (carRegNo, lotID, inTime, dayIn) => {
     if (ongoingSessionQuery.recordset.length > 0) {
       throw new Error("Cannot start a new parking session. An ongoing session already exists for this car.");
     }
-
+    const userCoins = await carOwnerOps.getUserCoins(userId);
+    console.log(userCoins.Coins)
+    if (userCoins.Coins < 0) {
+      throw new Error("Insufficient coins.");
+    }
+    
     const query = await poolS
       .request()
       .input("CarRegNo", sql.VarChar(10), carRegNo)
@@ -181,25 +188,64 @@ exports.startSession = async (carRegNo, lotID, inTime, dayIn) => {
 exports.endSession = async (carRegNo, outTime, dayOut) => {
   try {
     let poolS = await pool;
+
     let queryInTime = await poolS
       .request()
       .input("CarRegNo", sql.VarChar(10), carRegNo)
-      .query(`SELECT InTime FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
-    const inTime = queryInTime.recordset[0].InTime;
+      .query(`SELECT InTime, LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
     
+    if (queryInTime.recordset.length === 0) {
+      throw new Error("No ongoing session found for this car.");
+    }
+
+    const inTime = queryInTime.recordset[0].InTime;
+    const lotID = queryInTime.recordset[0].LotID;
+
     const durationInMs = outTime.getTime() - new Date(inTime).getTime();
     const durationInHours = durationInMs / (1000 * 60 * 60);
-    
+
     let queryHourlyRate = await poolS
       .request()
-      .input("CarRegNo", sql.VarChar(10), carRegNo)
-      .query(`SELECT * FROM HourlyRate WHERE LotID IN (SELECT LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo)`);
-    const hourlyRate = queryHourlyRate.recordset[0]; 
+      .input("LotID", sql.Int, lotID)
+      .query(`SELECT * FROM HourlyRate WHERE LotID = @LotID`);
+    
+    if (queryHourlyRate.recordset.length === 0) {
+      throw new Error("No hourly rate found for this lot.");
+    }
+
+    const hourlyRate = queryHourlyRate.recordset[0];
 
     let charge = 0;
     for (let i = 0; i < 24; i++) {
-      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours / i);
+      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours - i);
+      if (i >= durationInHours) break;
     }
+
+    let queryCarOwner = await poolS
+      .request()
+      .input("CarRegNo", sql.VarChar(10), carRegNo)
+      .query(`SELECT OwnerID FROM Car WHERE RegistrationNumber = @CarRegNo`);
+    
+    const ownerId = queryCarOwner.recordset[0].OwnerID;
+
+    let queryUserCoins = await poolS
+      .request()
+      .input("UserID", sql.Int, ownerId)
+      .query(`SELECT Coins FROM CarOwner WHERE ID = @UserID`);
+
+    const currentCoins = queryUserCoins.recordset[0].Coins;
+
+    if (currentCoins < charge) {
+      throw new Error("Insufficient coins.");
+    }
+
+    const newCoins = currentCoins - charge;
+
+    await poolS
+      .request()
+      .input("UserID", sql.Int, ownerId)
+      .input("NewCoins", sql.Decimal(10, 2), newCoins)
+      .query(`UPDATE CarOwner SET Coins = @NewCoins WHERE ID = @UserID`);
 
     let queryUpdate = await poolS
       .request()
@@ -219,15 +265,17 @@ exports.endSession = async (carRegNo, outTime, dayOut) => {
 };
 
 
+
 exports.getCurrentSessions = async (userID) => {
   try {
     let poolS = await pool;
     let query = await poolS
       .request()
       .input("UserID", sql.Int, userID)
-      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model
+      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model, l.LotName
               FROM ParkingSession ps
               INNER JOIN Car c ON ps.CarRegNo = c.RegistrationNumber
+              INNER JOIN Lot l ON ps.LotID = l.LotID
               WHERE c.OwnerID = @UserID AND ps.OutTime IS NULL`);
     return query.recordset;
   } catch (error) {
@@ -243,9 +291,10 @@ exports.getUserPastSessions = async (userID) => {
     let query = await poolS
       .request()
       .input("UserID", sql.Int, userID)
-      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model
+      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model, l.LotName
               FROM ParkingSession ps
               INNER JOIN Car c ON ps.CarRegNo = c.RegistrationNumber
+              INNER JOIN Lot l ON ps.LotID = l.LotID
               WHERE c.OwnerID = @UserID AND ps.OutTime IS NOT NULL`);
     return query.recordset;
   } catch (error) {
@@ -260,9 +309,10 @@ exports.getAllSessions = async (userID) => {
     let query = await poolS
       .request()
       .input("UserID", sql.Int, userID)
-      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model
+      .query(`SELECT ps.*, c.RegistrationNumber, c.Make, c.Model, l.LotName
               FROM ParkingSession ps
               INNER JOIN Car c ON ps.CarRegNo = c.RegistrationNumber
+              INNER JOIN Lot l ON ps.LotID = l.LotID
               WHERE c.OwnerID = @UserID`);
     return query.recordset;
   } catch (error) {
@@ -316,6 +366,7 @@ exports.getLotInfo = async () => {
       .request()
       .query(`SELECT 
                 Lot.LotID,
+                Lot.LotName,
                 CONCAT(Lot.AddressL1, ', ', Lot.AddressL2, ', ', Lot.City, ', ', Lot.Country) AS Location,
                 Lot.TotalZones AS TotalZones,
                 SUM(LotZone.capacity) AS TotalLotCapacity,
@@ -340,7 +391,7 @@ exports.getLotInfo = async () => {
               LEFT JOIN 
                 LotZone ON Lot.LotID = LotZone.LotID
               GROUP BY 
-                Lot.LotID, Lot.AddressL1, Lot.AddressL2, Lot.City, Lot.Country, Lot.TotalZones`);
+                Lot.LotID, Lot.LotName, Lot.AddressL1, Lot.AddressL2, Lot.City, Lot.Country, Lot.TotalZones`);
     return query.recordset;
   } catch (error) {
     console.log(error);
@@ -348,4 +399,52 @@ exports.getLotInfo = async () => {
   }
 };
 
+
+exports.getUserCoins = async (userId) => {
+  try {
+    let poolS = await pool;
+    let query = await poolS
+      .request()
+      .input("UserID", sql.Int, userId)
+      .query(`SELECT Coins FROM CarOwner WHERE ID = @UserID`);
+    return query.recordset[0];
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+exports.getUserTransactionHistory = async (userId) => {
+  try {
+    let poolS = await pool;
+    let query = await poolS
+      .request()
+      .input("UserID", sql.Int, userId)
+      .query(`
+        SELECT 
+          Amount AS TransactionAmount, 
+          TopupDate AS TransactionDate, 
+          'Topup' AS TransactionType 
+        FROM 
+          KioskTopups 
+        WHERE 
+          CarOwnerID = @UserID
+        UNION ALL
+        SELECT 
+          -Charge AS TransactionAmount, 
+          OutTime AS TransactionDate, 
+          'Charge' AS TransactionType 
+        FROM 
+          ParkingSession 
+        WHERE 
+          CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
+        ORDER BY 
+          TransactionDate DESC
+      `);
+    return query.recordset;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
