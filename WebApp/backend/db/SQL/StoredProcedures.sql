@@ -209,18 +209,51 @@ CREATE PROCEDURE AddLot
   @AddressL2 varchar(50),
   @City varchar(50),
   @Country varchar(50),
-  @LotName varchar(50)
+  @LotName varchar(50),
+  @TotalCapacity INT
 AS
 BEGIN
   SET NOCOUNT ON;
   IF EXISTS (SELECT 1 FROM LotOwner WHERE ID = @OwnerID)
   BEGIN
-    INSERT INTO Lot(LotOwnerID, TotalZones, PostalCode, AddressL1, AddressL2, City, Country, Status, LotName) values (@OwnerID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, 'PENDING', @LotName)   
+    INSERT INTO Lot(LotOwnerID, TotalZones, PostalCode, AddressL1, AddressL2, City, Country, Status, LotName, TotalCapacity) values (@OwnerID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, 'PENDING', @LotName, @TotalCapacity)   
     SELECT 1;
   END
   ELSE
   BEGIN
     SELECT 0 ;
+  END
+END;
+go
+-------------------------------------------------------
+go
+CREATE PROCEDURE AddLot
+  @OwnerID INT,
+  @TotalZones INT,
+  @PostalCode varchar(20),
+  @AddressL1 varchar(50),
+  @AddressL2 varchar(50),
+  @City varchar(50),
+  @Country varchar(50),
+  @LotName varchar(50),
+  @TotalCapacity INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  
+  IF EXISTS (SELECT 1 FROM LotOwner WHERE ID = @OwnerID)
+  BEGIN
+    -- Insert into Lot table
+    INSERT INTO Lot(LotOwnerID, TotalZones, PostalCode, AddressL1, AddressL2, City, Country, Status, LotName, TotalCapacity)
+    VALUES (@OwnerID, @TotalZones, @PostalCode, @AddressL1, @AddressL2, @City, @Country, 'PENDING', @LotName, @TotalCapacity); 
+
+    -- Return the LotID
+    SELECT SCOPE_IDENTITY() AS LotID;
+  END
+  ELSE
+  BEGIN
+    -- Return 0 if the owner doesn't exist
+    SELECT 0 AS LotID;
   END
 END;
 go
@@ -246,8 +279,8 @@ BEGIN
   END
 END;
 --------------------------------------
--- Lot Owner Dashboard
-CREATE PROCEDURE LotOwnerDashboard
+-- Lot Owner View Lots
+CREATE PROCEDURE ViewMyLots
     @OwnerID INT,
     @offset INT,
     @pageSize INT
@@ -260,7 +293,7 @@ BEGIN
         SELECT COUNT(LotOwnerID) AS TOTAL FROM LOT WHERE LotOwnerID = @OwnerID;
 
         -- Retrieve application details
-        SELECT LotID, LotName, City, Country, Status 
+        SELECT LotID, LotName, TotalZones, TotalCapacity, AddressL1, AddressL2, PostalCode, City, Country, Status  
 		FROM Lot WHERE LotOwnerID = @OwnerID
         ORDER BY LotID DESC
         OFFSET @offset ROWS
@@ -417,4 +450,5 @@ END
 select * from Car_Audit
 select * from CarOwner
 select * from UserAvatar
+
 
