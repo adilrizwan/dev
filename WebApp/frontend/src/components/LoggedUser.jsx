@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, useTheme, Switch, AppBar, Toolbar, Container, Button } from "@mui/material"
+import { Box, useTheme, AppBar, Toolbar, Container, Button, IconButton } from "@mui/material"
 import { useContext } from "react"
 import { ColorModeContext } from "../constants/theme"
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
@@ -21,12 +21,14 @@ function LoggedUser() {
     const token = localStorage.getItem('token');
     const [payload] = token.split('.').slice(1, 2);
     const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    
+
     var LogoRedirect;
     if (decodedPayload.role === 'ADMIN') {
         LogoRedirect = "admin/dashboard"
     } else if (decodedPayload.role === 'LOTOWNER') {
         LogoRedirect = "lot/dashboard"
+    } else if (decodedPayload.role === 'KIOSK') {
+        LogoRedirect = "kiosk/dashboard"
     } else {
         LogoRedirect = "car/dashboard"
     }
@@ -56,7 +58,14 @@ function LoggedUser() {
                         </Link>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Switch
+                        <IconButton onClick={colorMode.toggleColorMode}>
+                            {theme.palette.mode === "dark" ? (
+                                <DarkModeOutlinedIcon sx={{ color: theme.palette.white.main }} />
+                            ) : (
+                                <LightModeOutlinedIcon sx={{ color: theme.palette.black.main }} />
+                            )}
+                        </IconButton>
+                        {/* <Switch
                             checked={theme.palette.mode === 'dark'}
                             onChange={colorMode.toggleColorMode}
                             icon={<LightModeOutlinedIcon style={{ color: theme.palette.primary.main }} />}
@@ -70,7 +79,7 @@ function LoggedUser() {
                                     backgroundColor: theme.palette.primary.main
                                 }
                             }}
-                        />
+                        /> */}
                         <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>Logout</Button>
                     </Box>
                 </Toolbar>

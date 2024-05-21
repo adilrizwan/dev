@@ -3,7 +3,7 @@ import { Grid, Box, Button, Typography, TextField, Paper, Alert } from '@mui/mat
 import { margins } from '../../../constants/theme';
 import axios from 'axios';
 
-export default function CarSupport() {
+export default function LotSupport() {
     const token = localStorage.getItem('token');
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
@@ -12,7 +12,7 @@ export default function CarSupport() {
 
     const handleSubmit = async () => {
         try {
-            await axios.post('http://localhost:8000/car/support', { subject, body }, {
+            await axios.post('http://localhost:8000/lot/support', { subject, body }, {
                 headers: {
                     Authorization: `${token}`
                 }

@@ -44,3 +44,26 @@ BEGIN
     SELECT 'UPDATE', GETDATE(), i.OwnerID, i.RegistrationNumber, i.Make, i.Model, i.RegYear, i.Color, i.Type
     FROM inserted i;
 END;
+----------------------------------------------------------
+--Trigger for Updating Lot Avg Rating
+CREATE TRIGGER trg_UpdateLotAvgRating
+ON ParkingSession
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT * FROM inserted WHERE Rating IS NOT NULL)
+    BEGIN
+        -- Update AvgRating in the Lot table
+        UPDATE Lot
+        SET AvgRating = (
+            SELECT AVG(CAST(ps.Rating AS FLOAT))
+            FROM ParkingSession ps
+            WHERE ps.LotID = Lot.LotID
+            AND ps.Rating IS NOT NULL
+        )
+        WHERE Lot.LotID IN (SELECT DISTINCT LotID FROM inserted WHERE Rating IS NOT NULL);
+    END
+END;
+

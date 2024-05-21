@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { useTheme, Box, ThemeProvider, Container, Grid } from '@mui/material';
-import SideBar from './LotDrawer';
-import LotView from './LotView';
+import SideBar from './KioskDrawer';
+import KioskTopUp from './KioskTopUp';
 
-export default function LotDashboard() {
+export default function KioskDashboard() {
   const theme = useTheme();
-  const [currentComponent, setCurrentComponent] = React.useState(<LotView />);
+  const [currentComponent, setCurrentComponent] = React.useState(<KioskTopUp />);
 
   return (
     <ThemeProvider theme={theme}>

@@ -18,7 +18,7 @@ const ImageSlider = ({ avatarCount, onImageSelect }) => {
     const gender = decodedPayload.avatar % 2 === 0 ? 2 : 1;
     const [selectedImage, setSelectedImage] = useState(null);
     const [colorMode, setColorMode] = useState(sessionStorage.getItem("colorMode"));
-
+    
     let sliderRef = useRef(null);
 
     const next = () => {

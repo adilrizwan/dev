@@ -9,6 +9,7 @@ const loginRoutes = require("./routes/loginRoutes");
 const lotOwnerRoutes = require("./routes/lotOwnerRoutes");
 const carOwnerRoutes = require("./routes/carOwnerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const kioskRoutes = require("./routes/kioskRoutes");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/login", loginRoutes);
 app.use("/admin", adminRoutes);
 app.use("/lot", lotOwnerRoutes);
 app.use("/car", carOwnerRoutes);
+app.use("/kiosk", kioskRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is listening on ${PORT}`.underline.magenta);

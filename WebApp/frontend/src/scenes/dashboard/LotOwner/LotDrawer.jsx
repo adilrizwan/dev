@@ -1,12 +1,22 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import AddHomeIcon from '@mui/icons-material/AddHome';
 import { List, ListItemButton, Box, Typography, IconButton, useTheme, ListItemIcon, ListItemText, Divider, Toolbar, styled, ThemeProvider, useMediaQuery } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MuiDrawer from '@mui/material/Drawer';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { initializeApp } from 'firebase/app';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import firebaseConfig from '../../../constants/firebaseConfig'
+import LotView from './LotView';
+import LotSupport from './LotSupport';
+import LotProfile from './LotProfile';
+import LotAdd from './LotAdd';
+import LotAnalytics from './LotAnalytics';
 
 const drawerWidth = 240;
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -35,14 +45,29 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-export default function SideBar(props) {
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
+
+export default function SideBar({ onTabClick }) {
     const theme = useTheme();
+    const jwtToken = localStorage.getItem('token');
     const isScreenSmall = useMediaQuery(theme.breakpoints.down(700));
     const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {
         setOpen(!open);
     };
+    const [avatarUrl, setAvatarUrl] = useState(null);
+    const [payload] = jwtToken.split('.').slice(1, 2);
 
+    const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    const filePath = 'avatars/' + decodedPayload.avatar + '.jpg'
+
+    useEffect(() => {
+        const imageRef = ref(storage, filePath);
+        getDownloadURL(imageRef)
+            .then((url) => setAvatarUrl(url))
+            .catch((error) => console.error("Error getting download URL:", error));
+    }, [filePath]);
     return (
         <ThemeProvider theme={theme}>
             <Drawer variant="permanent" open={!isScreenSmall && open}>
@@ -59,16 +84,22 @@ export default function SideBar(props) {
                     </IconButton>
                 </Toolbar>
                 <Divider />
-                {open && (
+                {open && !isScreenSmall && (
                     <Box m="20px">
                         <Box display="flex" justifyContent="center" alignItems="center">
-                            <img
-                                alt="profile-user"
-                                width="100px"
-                                height="100px"
-                                // src={psy_avatar}
-                                style={{ cursor: "pointer", borderRadius: "50%" }}
-                            />
+                            {avatarUrl ? (
+                                <img
+                                    alt="profile-user"
+                                    width="100px"
+                                    height="100px"
+                                    src={avatarUrl}
+                                    style={{ cursor: "pointer", borderRadius: "50%" }}
+                                />
+                            ) : (
+                                <PersonOutlinedIcon
+                                    style={{ fontSize: "100px", color: theme.palette.text.primary }}
+                                />
+                            )}
                         </Box>
                         <Box textAlign="center">
                             <Typography
@@ -76,37 +107,47 @@ export default function SideBar(props) {
                                 fontWeight="bold"
                                 sx={{ m: "10px 0 0 0" }}
                             >
-                                {localStorage.getItem('userName')}
+                                {decodedPayload.name}
+                            </Typography>
+                        </Box>
+                        <Box textAlign="center">
+                            <Typography
+                                variant="subtitle"
+                            >
+                                Dashboard
                             </Typography>
                         </Box>
                     </Box>
                 )}
                 <List>
-                    <LotDrawerList
-                    //   onDashboardClick={props.onDashboardClick}
-                    //   onUpdateProfileClick={props.onUpdateProfileClick}
-                    //   onSearchClick={props.onSearchClick}
-                    //   onCVClick={props.onCVClick}
-                    />
+                    <LotDrawerList onTabClick={onTabClick} />
                 </List>
             </Drawer>
         </ThemeProvider>
     )
 }
 
-const LotDrawerList = () => (
+const LotDrawerList = ({ onTabClick }) => (
     <React.Fragment>
         {/* <Divider /> */}
-        <ListItemButton>
+        <ListItemButton onClick={() => onTabClick(<LotView />)}>
             <ListItemIcon>
                 <DashboardIcon />
             </ListItemIcon>
-            <ListItemText primary="Dashboard" />
+            <ListItemText primary="My Lots" />
+        </ListItemButton>
+        <Divider sx={{ mx: 2 }} />
+
+        <ListItemButton onClick={() => onTabClick(<LotAdd />)}>
+            <ListItemIcon>
+                <AddHomeIcon />
+            </ListItemIcon>
+            <ListItemText primary="Add Lot" />
         </ListItemButton>
         <Divider sx={{ mx: 2 }} />
 
         {/* <Divider /> */}
-        <ListItemButton>
+        <ListItemButton onClick={() => onTabClick(<LotAnalytics />)}>
             <ListItemIcon>
                 <BarChartIcon />
             </ListItemIcon>
@@ -115,7 +156,7 @@ const LotDrawerList = () => (
         <Divider sx={{ mx: 2 }} />
 
         {/* <Divider /> */}
-        <ListItemButton>
+        <ListItemButton onClick={() => onTabClick(<LotProfile />)}>
             <ListItemIcon>
                 <PersonOutlinedIcon />
             </ListItemIcon>
@@ -124,13 +165,14 @@ const LotDrawerList = () => (
         <Divider sx={{ mx: 2 }} />
 
         {/* <Divider /> */}
-        <ListItemButton>
+        <ListItemButton onClick={() => onTabClick(<LotSupport />)}>
             <ListItemIcon>
                 <HelpOutlineOutlinedIcon />
             </ListItemIcon>
-            <ListItemText primary="Help" />
+            <ListItemText primary="Support" />
         </ListItemButton>
         <Divider sx={{ mx: 2 }} />
+
     </React.Fragment>
 );
 

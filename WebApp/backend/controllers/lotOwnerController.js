@@ -1,10 +1,16 @@
 const lotOwnerOps = require("../db/lotOwnerOps");
 const paginate = require("../middleware/pagination");
-exports.dashboard = async (req, res) => {
+const { fb } = require("../db/firebaseConfig");
+
+exports.viewLots = async (req, res) => {
   if (req.user.role === "LOTOWNER") {
     try {
       const pages = await paginate.paginate(req.query.page);
-      const profile = await lotOwnerOps.dashboard(req.user.id, pages.start, pages.limit);
+      const profile = await lotOwnerOps.dashboard(
+        req.user.id,
+        pages.start,
+        pages.limit
+      );
       res.json(profile);
     } catch (error) {
       console.log(error);
@@ -49,12 +55,22 @@ exports.addLot = async (req, res) => {
   if (req.user.role === "LOTOWNER") {
     try {
       const post = req.body;
-      if (!post.AddressL1 || !post.City || !post.Country || !post.LotName) {
+      if (
+        !post.AddressL1 ||
+        !post.City ||
+        !post.Country ||
+        !post.LotName ||
+        !post.TotalCapacity ||
+        post.zones.length > 10
+      ) {
         res.status(400).json({ message: "Enter all required fields." });
         return;
       }
-      if (!post.TotalZones || post.TotalZones < 1) {
-        post.TotalZones = 1;
+      if (post.zones && Array.isArray(post.zones)) {
+        post.zones = post.zones.map((zone) => parseInt(zone));
+      }
+      if (!post.zones || post.zones.length < 1) {
+        post.zones.length = 1;
       }
       if (!post.PostalCode) {
         post.PostalCode = "";
@@ -68,7 +84,7 @@ exports.addLot = async (req, res) => {
       } else {
         res
           .status(204)
-          .json({ message: "User not found. Please contact ParkSense" });
+          .json({ message: "User not found. Please contact support." });
       }
     } catch (error) {
       console.log(error);
@@ -78,23 +94,58 @@ exports.addLot = async (req, res) => {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
-exports.updateLotStatus = async (req, res) => {
-    if (req.user.role === "LOTOWNER") {
-      try {
-        const post = req.body
-        const update = await lotOwnerOps.updateLotStatus(req.user.id, post);
-        if (update === 1) {
-          res.status(200).json({ message: "Success" });
-        } else {
-          res
-            .status(204)
-            .json({ message: "Lot not found" });
-        }
-      } catch (error) {
-        console.log(error);
-        res.status(400).json({ message: error });
+exports.support = async (req, res) => {
+  if (req.user.role === "LOTOWNER") {
+    try {
+      const subject = req.body.subject;
+      const id = req.user.id + ": " + subject;
+      const body = req.body.body;
+
+      if (!subject || !body) {
+        res.status(400).json({ message: "Enter all required fields." });
+        return;
       }
-    } else {
-      res.status(401).json({ message: "Unauthorized" });
+      if (subject.length > 65) {
+        res
+          .status(400)
+          .json({ message: "Subject must be maximum 60 characters long." });
+        return;
+      }
+
+      if (body.length > 510) {
+        res
+          .status(400)
+          .json({ message: "Body must be maximum 500 characters long." });
+        return;
+      }
+      const response = await fb
+        .collection("Lot-Support")
+        .doc(id)
+        .set({ subject, body, status: "PENDING" });
+      res.send(response);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: error });
     }
-  };
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+exports.updateLotStatus = async (req, res) => {
+  if (req.user.role === "LOTOWNER") {
+    try {
+      const post = req.body;
+      const update = await lotOwnerOps.updateLotStatus(req.user.id, post);
+      if (update === 1) {
+        res.status(200).json({ message: "Success" });
+      } else {
+        res.status(204).json({ message: "Lot not found" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};

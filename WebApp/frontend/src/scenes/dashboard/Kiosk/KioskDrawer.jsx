@@ -1,20 +1,15 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import HistoryIcon from '@mui/icons-material/History';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { List, ListItemButton, Box, Typography, IconButton, useTheme, ListItemIcon, ListItemText, Divider, Toolbar, styled, ThemeProvider, useMediaQuery } from '@mui/material';
 import MuiDrawer from '@mui/material/Drawer';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { initializeApp } from 'firebase/app';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import firebaseConfig from '../../../constants/firebaseConfig'
-import CarSupport from './CarSupport';
-import CarProfile from './CarProfile';
-import CarView from './CarView';
-import CarHistory from './CarHistory';
+import KioskTopUp from './KioskTopUp';
 
 const drawerWidth = 240;
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -58,7 +53,7 @@ export default function SideBar({ onTabClick }) {
     const [payload] = jwtToken.split('.').slice(1, 2);
 
     const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    const filePath = 'avatars/' + decodedPayload.avatar + '.jpg'
+    const filePath = 'avatars/' + 1 + '.jpg'
 
     useEffect(() => {
         const imageRef = ref(storage, filePath);
@@ -112,57 +107,31 @@ export default function SideBar({ onTabClick }) {
                             <Typography
                                 variant="subtitle"
                             >
-                                Dashboard
+                                Kiosk Manager
                             </Typography>
                         </Box>
                     </Box>
                 )}
                 <List>
-                    <CarDrawerList onTabClick={onTabClick} />
+                    <KioskDrawerList onTabClick={onTabClick} />
                 </List>
             </Drawer>
         </ThemeProvider>
     )
 }
 
-const CarDrawerList = ({ onTabClick }) => (
+const KioskDrawerList = ({ onTabClick }) => (
 
     <React.Fragment>
 
         {/* <Divider /> */}
-        <ListItemButton onClick={() => onTabClick(<CarView />)}>
+        <ListItemButton onClick={() => onTabClick(<KioskTopUp />)}>
             <ListItemIcon>
-                <DirectionsCarIcon />
+                <MonetizationOnIcon />
             </ListItemIcon>
-            <ListItemText primary="Vehicles" />
+            <ListItemText primary="Credit Coins" />
         </ListItemButton>
         <Divider sx={{ mx: 2 }} />
 
-        {/* <Divider /> */}
-        <ListItemButton onClick={() => onTabClick(<CarHistory />)}>
-            <ListItemIcon>
-                <HistoryIcon />
-            </ListItemIcon>
-            <ListItemText primary="History" />
-        </ListItemButton>
-        <Divider sx={{ mx: 2 }} />
-
-        {/* <Divider /> */}
-        <ListItemButton onClick={() => onTabClick(<CarProfile />)}>
-            <ListItemIcon>
-                <PersonOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText primary="Profile" />
-        </ListItemButton>
-        <Divider sx={{ mx: 2 }} />
-
-        {/* <Divider /> */}
-        <ListItemButton onClick={() => onTabClick(<CarSupport />)}>
-            <ListItemIcon>
-                <HelpOutlineOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText primary="Support" />
-        </ListItemButton>
-        <Divider sx={{ mx: 2 }} />
     </React.Fragment>
 )
