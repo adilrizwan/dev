@@ -144,7 +144,10 @@ exports.startParkingSession = async (req, res) => {
       const { carRegNo, lotID } = req.body;
       const inTime = new Date(); 
       const dayIn = inTime.getDate(); 
-      const result = await carOwnerOps.startSession(carRegNo, lotID, inTime, dayIn);
+      
+      const userId = req.user.id;
+      
+      const result = await carOwnerOps.startSession(carRegNo, lotID, inTime, dayIn, userId);
       res.status(201).json({ message: "Parking session started successfully" });
     } catch (error) {
       console.log(error);
@@ -155,7 +158,7 @@ exports.startParkingSession = async (req, res) => {
   }
 };
 
-// Controller function
+
 exports.endParkingSession = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
@@ -163,7 +166,6 @@ exports.endParkingSession = async (req, res) => {
       const outTime = new Date(); 
       const dayOut = outTime.getDate(); 
       
-      // Call the endSession function to calculate charges and update ParkingSession
       const { rowsAffected, charge } = await carOwnerOps.endSession(carRegNo, outTime, dayOut);
       
       if (rowsAffected > 0) {
@@ -220,7 +222,7 @@ exports.getRecentParkingLots = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
       const userID = req.user.id;
-      const { limit } = req.body || 5; // Default limit to 5 if not specified
+      const { limit } = req.body || 5; 
       
       const recentParkingLots = await carOwnerOps.getRecentParkingLots(userID, limit);
       res.json(recentParkingLots);
@@ -259,6 +261,45 @@ exports.getLotInfo = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch lot information", error: error.message });
   }
 };
+
+exports.getUserCoins = async (req, res) => {
+  if (req.user.role === "CAROWNER") {
+    try {
+      const userId = req.user.id;  
+      const result = await carOwnerOps.getUserCoins(userId);
+      if (result) {
+        res.json({ coins: result.Coins });
+      } else {
+        res.status(404).json({ message: "User not found" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: "Failed to fetch user coins", error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+exports.getUserTransactionHistory = async (req, res) => {
+  if (req.user.role === "CAROWNER") {
+    try {
+      const userId = req.user.id;  
+      const transactions = await carOwnerOps.getUserTransactionHistory(userId);
+      if (transactions.length > 0) {
+        res.json({ transactions });
+      } else {
+        res.status(404).json({ message: "No transactions found for this user" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ message: "Failed to fetch transaction history", error });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
 
 
 

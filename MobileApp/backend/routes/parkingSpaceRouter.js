@@ -3,7 +3,7 @@ const {getEmptySpaces, updateEmptySpaces, incEmptySpaces, decEmptySpaces} = requ
 
 const router = express.Router();
 
-router.get("/:lotid/:zoneid",getEmptySpaces)
+router.get('/get/:lotid?', getEmptySpaces);
 router.patch("/inc/:lotid/:zoneid",incEmptySpaces)
 router.patch("/dec/:lotid/:zoneid",decEmptySpaces)
 router.patch("/:lotid/:zoneid",updateEmptySpaces)
