@@ -31,8 +31,9 @@ exports.loginAuth = async (req, res) => {
       } else {
         jwToken = generateToken(
           pass.UserRole.toUpperCase(),
-          details.ID,
-          details.Name
+          details.User.ID,
+          details.User.Name,
+          details.Avatar
         );
       }
       return res.send({

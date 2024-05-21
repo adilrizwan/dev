@@ -118,7 +118,6 @@ exports.registerAuth = async (req, res) => {
           } else {
             avatar = 0;
           }
-          console.log(avatar);
 
           const carOwner = new carOwnerStruct(
             details.role.toUpperCase(),

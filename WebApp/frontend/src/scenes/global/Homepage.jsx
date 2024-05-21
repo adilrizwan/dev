@@ -4,6 +4,7 @@ import { initializeApp } from 'firebase/app';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import firebaseConfig from '../../constants/firebaseConfig';
 import Plans from './Plans';
+import { useNavigate } from 'react-router-dom';
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
@@ -11,7 +12,8 @@ const storage = getStorage(app, "gs://parksense-82db2.appspot.com");
 export default function Homepage() {
     const theme = useTheme();
     const [images, setImages] = useState({});
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         const fetchImages = async () => {
             try {
@@ -82,6 +84,9 @@ export default function Homepage() {
                     <Button
                         type="submit"
                         fullWidth
+                        onClick={() => {
+                            navigate('/car/register')
+                        }}
                         variant="contained"
                         sx={{ mt: 3, mb: 2, backgroundColor: theme.palette.primary.main }}
                     >
@@ -104,6 +109,9 @@ export default function Homepage() {
                         <Button
                             type="submit"
                             fullWidth
+                            onClick={() => {
+                                navigate('/lot/register')
+                            }}
                             variant="contained"
                             sx={{ mt: 3, mb: 2, backgroundColor: theme.palette.primary.main }}
                         >

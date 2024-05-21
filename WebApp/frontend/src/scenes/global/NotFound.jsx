@@ -28,6 +28,8 @@ function NotFound() {
         LogoRedirect = "admin/dashboard"
     } else if (decodedPayload.role === 'LOTOWNER') {
         LogoRedirect = "lot/dashboard"
+    } else if (decodedPayload.role === 'KIOSK') {
+        LogoRedirect = "kiosk/dashboard"
     } else {
         LogoRedirect = "car/dashboard"
     }
