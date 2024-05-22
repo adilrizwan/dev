@@ -3,7 +3,11 @@ import { Appbar, Divider } from 'react-native-paper';
 import { Image, View } from 'react-native';
 import { theme } from '../../constants/themes';
 
-const ParkSense = () => {
+const ParkSense = ({ width, margin }) => {
+
+    const W = width || 210
+    const M = null || margin
+
     return (
         <View>
             <Appbar.Header style={{
@@ -19,10 +23,11 @@ const ParkSense = () => {
                     style={{
                         resizeMode: 'center',
                         height: 100,
-                        width: 180,
+                        width: W,
+                        marginBottom: M
                     }} />
             </Appbar.Header>
-            <Divider style={{height:0.4}}/>
+            <Divider style={{ height: 0.5 }} />
         </View>
 
     )

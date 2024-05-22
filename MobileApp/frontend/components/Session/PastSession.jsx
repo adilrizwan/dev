@@ -1,26 +1,56 @@
 import React from 'react'
-import { View } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { Divider, Text, Card, Icon, MD3Colors, } from 'react-native-paper'
+import { theme } from '../../constants/themes';
+import { AirbnbRating } from 'react-native-ratings';
+import StarRating from 'react-native-star-svg-rating';
 
-const PastSession = ({ props }) => {
+const PastSession = ({ session }) => {
 
+    const [see, setSee] = React.useState('See More');
+    const [rating, setRating] = React.useState(0);
+
+    const flip = () => {
+        if (see === 'See More') {
+            setSee('See Less')
+        }
+        else {
+            setSee('See More')
+        }
+    }
+
+    // console.log("past:",session)
     const head = "Quicksand_700Bold"
     const content = "Quicksand_600SemiBold"
 
-    const { CarRegNo, InTime, DayIn, OutTime, DayOut, LotName } = props
+    const { CarRegNo, InTime, OutTime, LotName, Charge, Make, Model, Rating } = session
+    console.log(session)
 
-    const InHour = (InTime.getHours())
-    const InMin = (InTime.getMinutes())
-    const InSec = (InTime.getSeconds())
+    const timeIn = new Date(InTime)
+    const timeOut = new Date(OutTime)
 
-    const OutHour = (OutTime.getHours())
-    const OutMin = (OutTime.getMinutes())
-    const OutSec = (OutTime.getSeconds())
+    const DayIn = timeIn.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    }).replace(',', '');
+    const InHour = (timeIn.getHours())
+    const InMin = (timeIn.getMinutes())
+    // const InSec = (timeIn.getSeconds())
+
+    const DayOut = timeOut.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    }).replace(',', '');
+    const OutHour = (timeOut.getHours())
+    const OutMin = (timeOut.getMinutes())
+    // const OutSec = (timeOut.getSeconds())
 
     const margin = 10
     return (
         <View>
-            <Card style={{ paddingHorizontal: margin, paddingVertical: margin * 1.8, margin: margin }}>
+            <Card style={{ paddingHorizontal: margin, paddingVertical: margin * 1.3, margin: margin }}>
                 <View style={{ flexDirection: 'row', marginHorizontal: 3 }}>
                     <Text
                         ellipsizeMode='tail'
@@ -31,7 +61,8 @@ const PastSession = ({ props }) => {
                             minWidth: '60%',
                             fontFamily: head,
                             fontSize: 18
-                        }}>
+                        }}
+                    >
                         {LotName}
                     </Text>
                     <Text style={{
@@ -39,7 +70,7 @@ const PastSession = ({ props }) => {
                         fontFamily: content,
                         fontSize: 18
                     }}>
-                        $ 1.05
+                        $ {Charge || `0.00`}
                     </Text>
                 </View>
                 <View style={{ marginVertical: margin, }}>
@@ -69,6 +100,46 @@ const PastSession = ({ props }) => {
                             {((OutHour) % 12 || 12) < 10 ? '0' : ''}{((OutHour) % 12 || 12)}{":"}{OutMin < 10 ? '0' : ''}{OutMin}{OutHour > 12 ? ' PM ' : ' AM '}{DayOut}
                         </Text>
                     </View>
+                </View>
+                {see === 'See More' ?
+                    <></>
+                    :
+                    <></>
+                }
+                <View style={{ flexDirection: 'row', marginHorizontal: 3 }}>
+                    <Icon
+                        source="car"
+                        color={theme.colors.onPrimaryContainer}
+                        size={25}
+                    />
+                    <Text style={{
+                        fontFamily: "Quicksand_500Medium",
+                        fontSize: 14,
+                        // textAlign: 'left'
+                    }}
+                    >
+                        {Make} {Model} {`(`}{CarRegNo}{`)`}
+                    </Text>
+                </View>
+                <View style={{ flexDirection: 'row', marginVertical: 7 }}>
+                    <StarRating
+                        rating={Rating}
+                        onChange={setRating}
+                        animationConfig={{ scale: 1 }}
+                        starSize={25}
+                    />
+                </View>
+                <View style={{alignItems:'flex-end'}}>
+                    <TouchableOpacity onPress={flip}>
+                        <Text style={{
+                            fontFamily: "Quicksand_400Regular",
+                            fontSize: 12,
+                            textAlign: 'right'
+                        }}>
+                            {see}
+                        </Text>
+                    </TouchableOpacity>
+
                 </View>
             </Card>
 
