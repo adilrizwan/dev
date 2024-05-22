@@ -3,14 +3,13 @@ import { ScrollView, View, Image } from 'react-native'
 import { TextInput, Text, Button, Snackbar } from 'react-native-paper';
 import { theme } from '../constants/themes'
 import axios from 'axios';
-import { useAuth } from '../AuthProvider'
-
-import { AuthContext } from "../auth-context"
+import { useAuth } from '../auth/AuthProvider'
+import { AuthContext } from "../auth/auth-context"
 
 const LoginPage = ({ navigation, route }) => {
 
     const auth = React.useContext(AuthContext);
-    const { handleLoginSuccess } = useAuth();
+    // const { handleLoginSuccess } = useAuth();
 
     const [loginData, setLoginData] = useState({
         email: '',
@@ -37,15 +36,18 @@ const LoginPage = ({ navigation, route }) => {
     const margin = 10
 
     const login = async () => {
+        api_url = process.env.EXPO_PUBLIC_BACKEND_API_URL + "/login"
+        // console.log(api_url)
+
         try {
-            const payload = await axios.post("http://192.168.18.53:8000/login", loginData)
+            const payload = await axios.post(api_url, loginData)
             console.log("response", payload.data.token)
             const username = "user";
             auth.login(username, payload.data.token)
-            handleLoginSuccess();
+            // handleLoginSuccess();
         }
         catch (err) {
-            console.log("Error:", err.response.data.message)
+            console.log("Error:", err)
             setErrorMessage(err.response.data.message)
             setVisible(true)
         }

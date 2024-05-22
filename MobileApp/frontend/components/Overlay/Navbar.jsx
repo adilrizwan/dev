@@ -7,7 +7,7 @@ import HomePage from '../../pages/HomePage';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SessionPage from '../../pages/SessionPage';
-import QRcodeScanner from '../../pages/QRcode';
+import QRcodePage from '../../pages/QRcodePage';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -92,7 +92,7 @@ const Navbar = () => {
       />
       <Tab.Screen
         name="Scan"
-        component={QRcodeScanner}
+        component={QRcodePage}
         options={{
           unmountOnBlur: true,
           tabBarLabel: 'Scan',
@@ -118,34 +118,6 @@ const Navbar = () => {
     </Tab.Navigator>
   )
 
-  function HomeScreen() {
-    return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <Text variant="headlineMedium">Home!</Text>
-      </View>
-    );
-  }
-
-  function Scan() {
-    return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff'
-      }}>
-        <Text
-          // variant="headlineMedium"
-          style={{
-            fontFamily: 'Quicksand_400Regular'
-          }}>Scan!</Text>
-      </View>
-    );
-  }
   function Profile() {
     return (
       <View style={{

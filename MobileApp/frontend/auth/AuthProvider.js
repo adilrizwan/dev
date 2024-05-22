@@ -26,7 +26,7 @@ export const useAuth = () => {
     setToken(null);
     setTokenExpirationDate(null);
     setUserId(null);
-    await SecureStore.deleteItemAsync(key, options)
+    await SecureStore.deleteItemAsync("user")
   }, []);
 
   useEffect(() => {

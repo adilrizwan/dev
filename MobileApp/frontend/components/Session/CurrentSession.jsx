@@ -3,12 +3,13 @@ import { View } from 'react-native'
 import { Avatar, Button, Card, Divider, Text, Icon } from 'react-native-paper';
 import { theme } from '../../constants/themes';
 
-const CurrentSession = ({ props }) => {
+const CurrentSession = ({ session }) => {
 
+    // console.log("current:", session)
     const head = "Quicksand_700Bold"
     const content = "Quicksand_600SemiBold"
 
-    const { CarRegNo, InTime, DayIn, LotName } = props
+    const { CarRegNo, InTime, DayIn, LotName } = session
 
     const InHour = (InTime.getHours())
     const InMin = (InTime.getMinutes())
@@ -43,7 +44,14 @@ const CurrentSession = ({ props }) => {
 
     return (
         <View>
-            <Card style={{ paddingHorizontal: margin, paddingVertical: margin * 1.8, margin: margin }}>
+            <Card
+                style={{
+                    paddingHorizontal: margin,
+                    paddingVertical: margin * 1.8,
+                    margin: margin
+                }}
+            // onPress={}
+            >
                 <View style={{ flexDirection: 'row', marginHorizontal: 3 }}>
                     <Text
                         ellipsizeMode='tail'
@@ -55,7 +63,8 @@ const CurrentSession = ({ props }) => {
                             fontFamily: head,
                             fontSize: 18
                         }}
-                    >{LotName}
+                    >
+                        {LotName}
                     </Text>
                 </View>
                 <View style={{ marginVertical: margin, }}>

@@ -5,13 +5,13 @@ import Navbar from './components/Overlay/Navbar';
 import { NavigationContainer } from '@react-navigation/native';
 import { theme } from './constants/themes';
 import ParkSense from './components/Overlay/ParkSense';
-import { startTransition } from 'react';
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SecureStore from 'expo-secure-store';
 import * as Keychain from "react-native-keychain";
-import { useAuth } from './AuthProvider';
+import { useAuth } from './auth/AuthProvider';
 
-import { AuthContext } from "./auth-context"
+import { AuthContext } from "./auth/auth-context"
 
 import {
     useFonts,
@@ -25,7 +25,7 @@ import LoginPage from './pages/LoginPage';
 import { View } from 'react-native';
 import AppLoading from 'expo-app-loading';
 import HomePage from './pages/HomePage';
-import QRcode from './pages/QRcode';
+import QRcode from './pages/QRcodePage';
 import SessionPage from './pages/SessionPage';
 import ProfilePage from './pages/ProfilePage';
 
@@ -62,6 +62,13 @@ export default function App() {
     //     })();
     // }, []);
 
+    // React.useEffect(() => {
+    async function deleteToken() {
+        await SecureStore.deleteItemAsync("user")
+    }
+    // deleteToken();
+    // }, [])
+
     const handleLoginSuccess = () => {
         setIsLoggedIn(true);
     };
@@ -81,35 +88,42 @@ export default function App() {
             }}
         >
             <NavigationContainer>
-                <Stack.Navigator
-                    screenOptions={{
-                        headerShown: true,
-                        headerTitle: props => <ParkSense {...props} />, // Render ParkSense component in headerTitle
-                        headerTitleAlign: 'left',
-                    }}
-                >
+                <PaperProvider theme={theme}>
+
                     {!token ?
-                        // <PaperProvider theme={theme}>
-                        <Stack.Screen name="LoginPage" component={LoginPage}
-                        // options={{ headerTitle: (props) => <ParkSense {...props} /> }} 
-                        />
-                        // </PaperProvider>
+                        <Stack.Navigator
+                            screenOptions={{
+                                headerShown: true,
+                                headerTitle: props => <ParkSense {...props} width={260} margin={15} />, // Render ParkSense component in headerTitle
+                                headerTitleAlign: 'left',
+                            }}
+                        >
+                            <Stack.Screen name="LoginPage" component={LoginPage}
+                            // options={{ headerTitle: (props) => <ParkSense {...props} /> }} 
+                            />
+
+                        </Stack.Navigator>
                         :
                         // <PaperProvider theme={theme}>
                         <>
-                            <Stack.Screen name="HomePage" component={HomePage} options={{ headerTitleAlign: 'center' }} />
+                            <ParkSense />
+                            <Navbar />
+                            {/* <Stack.Navigator>
+                            <Stack.Screen name="HomePage" component={HomePage}
+                                // options={{ headerTitleAlign: 'center' }} 
+                                options={{ headerShown: false }} />
                             <Stack.Screen name="ProfilePage" component={ProfilePage} />
                             <Stack.Screen name="QRcode" component={QRcode} />
                             <Stack.Screen name="SessionPage" component={SessionPage} />
-                            {/* <Navbar /> */}
+                        </Stack.Navigator> */}
                         </>
                         // </PaperProvider>
 
                     }
-                </Stack.Navigator>
+                </PaperProvider>
 
             </NavigationContainer >
-        </AuthContext.Provider>
+        </AuthContext.Provider >
     );
 }
 
