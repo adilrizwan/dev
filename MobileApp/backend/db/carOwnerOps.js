@@ -184,41 +184,27 @@ exports.startSession = async (carRegNo, lotID, inTime, dayIn, userId) => {
   }
 };
 
-
 exports.endSession = async (carRegNo, outTime, dayOut) => {
   try {
     let poolS = await pool;
-
     let queryInTime = await poolS
       .request()
       .input("CarRegNo", sql.VarChar(10), carRegNo)
-      .query(`SELECT InTime, LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
-    
-    if (queryInTime.recordset.length === 0) {
-      throw new Error("No ongoing session found for this car.");
-    }
-
+      .query(`SELECT InTime FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
     const inTime = queryInTime.recordset[0].InTime;
-    const lotID = queryInTime.recordset[0].LotID;
-
+    
     const durationInMs = outTime.getTime() - new Date(inTime).getTime();
     const durationInHours = durationInMs / (1000 * 60 * 60);
-
+    
     let queryHourlyRate = await poolS
       .request()
-      .input("LotID", sql.Int, lotID)
-      .query(`SELECT * FROM HourlyRate WHERE LotID = @LotID`);
-    
-    if (queryHourlyRate.recordset.length === 0) {
-      throw new Error("No hourly rate found for this lot.");
-    }
-
-    const hourlyRate = queryHourlyRate.recordset[0];
+      .input("CarRegNo", sql.VarChar(10), carRegNo)
+      .query(`SELECT * FROM HourlyRate WHERE LotID IN (SELECT LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo)`);
+    const hourlyRate = queryHourlyRate.recordset[0]; 
 
     let charge = 0;
     for (let i = 0; i < 24; i++) {
-      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours - i);
-      if (i >= durationInHours) break;
+      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours / i);
     }
 
     let queryCarOwner = await poolS

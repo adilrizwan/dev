@@ -11,15 +11,28 @@ const Scanner = ({ navigation }) => {
     const [scanned, setScanned] = React.useState(false);
     const [result, setResult] = React.useState("null");
 
-    const scanHandler = ({ data }) => {
-        setTimeout(() => {
-            // setScanned(true);
-            // setResult(data)
-            console.log(data);
-            navigation.navigate('SessionStart', {
-                result: data,
-            });
-        }, 1000);
+    const scanHandler = ( {data} ) => {
+        // console.log("scanned",JSON.parse(data).Session)
+
+        if (JSON.parse(data).Session === "ENTRY"){
+            setTimeout(() => {
+
+                // console.log("scanner", data.data.Lot_Name)
+                navigation.navigate('SessionStart', {
+                    data : JSON.parse(data),
+                });
+            }, 1000);
+        }
+        else if(JSON.parse(data).Session == "EXIT"){
+            setTimeout(() => {
+
+                // console.log("scanner", data.data.Lot_Name)
+                navigation.navigate('SessionEnd', {
+                    data : JSON.parse(data),
+                });
+            }, 1000);
+        }
+        
 
     }
 
@@ -94,9 +107,9 @@ const Scanner = ({ navigation }) => {
                 barCodeScannerSettings={{
                     barCodeTypes: ["qr"],
                 }}
-                onBarcodeScanned={scanned ? undefined : scanHandler}
+                onBarcodeScanned={scanHandler}
             >
-                <View style={{ flexDirection: 'row', marginTop: 90, marginHorizontal:-60 }}>
+                <View style={{ flexDirection: 'row', marginTop: 90, marginHorizontal: -60 }}>
 
                     <View style={styles.barcodeGuideline} />
                     <View style={styles.barcodeGuideline} />
@@ -116,7 +129,7 @@ const Scanner = ({ navigation }) => {
                     <View style={styles.barcodeGuideline1} />
 
                 </View>
-                <View style={{ flexDirection: 'row', marginTop: -4, marginHorizontal:-60 }}>
+                <View style={{ flexDirection: 'row', marginTop: -4, marginHorizontal: -60 }}>
 
                     <View style={styles.barcodeGuideline} />
                     <View style={styles.barcodeGuideline} />

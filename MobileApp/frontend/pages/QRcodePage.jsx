@@ -6,6 +6,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Appbar } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
 import ParkSense from '../components/Overlay/ParkSense';
+import ParkingDetails from '../components/QR/ParkingDetails';
+import SessionEnd from '../components/QR/SessionEnd';
 
 const QRcodePage = () => {
 
@@ -34,6 +36,8 @@ const QRcodePage = () => {
                 }}>
                     <Stack.Screen name="QR Code Scanner" component={Scanner} />
                     <Stack.Screen name="SessionStart" component={SessionStart} />
+                    <Stack.Screen name="ParkingDetails" component={ParkingDetails}/>
+                    <Stack.Screen name="SessionEnd" component={SessionEnd}/>
                 </Stack.Navigator>
             </View>
         </>

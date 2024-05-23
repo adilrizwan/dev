@@ -14,7 +14,7 @@ const SessionPage = () => {
     const [value, setValue] = React.useState('Active');
     const { token } = useAuth();
 
-    console.log("token:", token)
+    // console.log("token:", token)
 
     const active = { CarRegNo: 'ABC-123', InTime: new Date(), DayIn: '1 Jan 2024', LotName: 'IBA Main Campus' }
     const past = [{ CarRegNo: 'ABC-123', InTime: new Date(), DayIn: '1 Jan 2024', OutTime: new Date(), DayOut: '2 Jan 2024', LotName: 'IBA Main Campus' },
@@ -112,9 +112,7 @@ const SessionPage = () => {
                         </View> :
                         activeSessions.map((session, index) => {
                             return (
-                                <TouchableOpacity key={index} >
-                                    <CurrentSession session={session} key={index} />
-                                </TouchableOpacity>
+                                <CurrentSession session={session} key={index} />
                             )
                         })
                     :
