@@ -7,24 +7,14 @@ import StarRating from 'react-native-star-svg-rating';
 
 const PastSession = ({ session }) => {
 
-    const [see, setSee] = React.useState('See More');
     const [rating, setRating] = React.useState(0);
-
-    const flip = () => {
-        if (see === 'See More') {
-            setSee('See Less')
-        }
-        else {
-            setSee('See More')
-        }
-    }
 
     // console.log("past:",session)
     const head = "Quicksand_700Bold"
     const content = "Quicksand_600SemiBold"
 
     const { CarRegNo, InTime, OutTime, LotName, Charge, Make, Model, Rating } = session
-    console.log(session)
+    // console.log(session)
 
     const timeIn = new Date(InTime)
     const timeOut = new Date(OutTime)
@@ -101,11 +91,7 @@ const PastSession = ({ session }) => {
                         </Text>
                     </View>
                 </View>
-                {see === 'See More' ?
-                    <></>
-                    :
-                    <></>
-                }
+
                 <View style={{ flexDirection: 'row', marginHorizontal: 3 }}>
                     <Icon
                         source="car"
@@ -128,18 +114,6 @@ const PastSession = ({ session }) => {
                         animationConfig={{ scale: 1 }}
                         starSize={25}
                     />
-                </View>
-                <View style={{alignItems:'flex-end'}}>
-                    <TouchableOpacity onPress={flip}>
-                        <Text style={{
-                            fontFamily: "Quicksand_400Regular",
-                            fontSize: 12,
-                            textAlign: 'right'
-                        }}>
-                            {see}
-                        </Text>
-                    </TouchableOpacity>
-
                 </View>
             </Card>
 

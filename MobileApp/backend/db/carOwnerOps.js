@@ -184,41 +184,27 @@ exports.startSession = async (carRegNo, lotID, inTime, dayIn, userId) => {
   }
 };
 
-
 exports.endSession = async (carRegNo, outTime, dayOut) => {
   try {
     let poolS = await pool;
-
     let queryInTime = await poolS
       .request()
       .input("CarRegNo", sql.VarChar(10), carRegNo)
-      .query(`SELECT InTime, LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
-    
-    if (queryInTime.recordset.length === 0) {
-      throw new Error("No ongoing session found for this car.");
-    }
-
+      .query(`SELECT InTime FROM ParkingSession WHERE CarRegNo = @CarRegNo AND OutTime IS NULL`);
     const inTime = queryInTime.recordset[0].InTime;
-    const lotID = queryInTime.recordset[0].LotID;
-
+    
     const durationInMs = outTime.getTime() - new Date(inTime).getTime();
     const durationInHours = durationInMs / (1000 * 60 * 60);
-
+    
     let queryHourlyRate = await poolS
       .request()
-      .input("LotID", sql.Int, lotID)
-      .query(`SELECT * FROM HourlyRate WHERE LotID = @LotID`);
-    
-    if (queryHourlyRate.recordset.length === 0) {
-      throw new Error("No hourly rate found for this lot.");
-    }
-
-    const hourlyRate = queryHourlyRate.recordset[0];
+      .input("CarRegNo", sql.VarChar(10), carRegNo)
+      .query(`SELECT * FROM HourlyRate WHERE LotID IN (SELECT LotID FROM ParkingSession WHERE CarRegNo = @CarRegNo)`);
+    const hourlyRate = queryHourlyRate.recordset[0]; 
 
     let charge = 0;
     for (let i = 0; i < 24; i++) {
-      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours - i);
-      if (i >= durationInHours) break;
+      charge += hourlyRate[`Hour${i < 10 ? '0' + i : i}`] * (i < durationInHours ? 1 : durationInHours / i);
     }
 
     let queryCarOwner = await poolS
@@ -235,9 +221,9 @@ exports.endSession = async (carRegNo, outTime, dayOut) => {
 
     const currentCoins = queryUserCoins.recordset[0].Coins;
 
-    if (currentCoins < charge) {
-      throw new Error("Insufficient coins.");
-    }
+    // if (currentCoins < charge) {
+    //   throw new Error("Insufficient coins.");
+    // }
 
     const newCoins = currentCoins - charge;
 
@@ -421,25 +407,42 @@ exports.getUserTransactionHistory = async (userId) => {
       .request()
       .input("UserID", sql.Int, userId)
       .query(`
-        SELECT 
-          Amount AS TransactionAmount, 
-          TopupDate AS TransactionDate, 
-          'Topup' AS TransactionType 
-        FROM 
-          KioskTopups 
-        WHERE 
-          CarOwnerID = @UserID
-        UNION ALL
-        SELECT 
-          -Charge AS TransactionAmount, 
-          OutTime AS TransactionDate, 
-          'Charge' AS TransactionType 
-        FROM 
-          ParkingSession 
-        WHERE 
-          CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
-        ORDER BY 
-          TransactionDate DESC
+      SELECT MESA.Amount,
+      MESA.Date,
+      MESA.Type,
+      Kiosk.Name AS Name FROM 
+      (SELECT 
+         Amount AS Amount, 
+         TopupDate AS Date, 
+         'Topup' AS Type,
+     KioskID AS ID
+       FROM 
+         KioskTopups 
+       WHERE 
+         CarOwnerID = @UserID ) AS MESA
+
+     left join Kiosk on MESA.ID = Kiosk.KioskID
+
+     union all 
+
+     Select  MESAS.Amount,
+   MESAS.Date,
+   MESAS.Type,
+   Lot.LotName as Name From
+       (SELECT 
+         -Charge AS Amount, 
+         OutTime AS Date, 
+         'Charge' AS Type ,
+     LotID AS ID
+       FROM 
+         ParkingSession 
+       WHERE 
+         CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
+   ) as MESAS
+   left join 
+   Lot on Lot.LotID = MESAS.ID
+       ORDER BY 
+         Date DESC 
       `);
     return query.recordset;
   } catch (error) {

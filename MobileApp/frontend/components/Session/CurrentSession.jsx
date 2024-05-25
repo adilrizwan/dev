@@ -9,11 +9,16 @@ const CurrentSession = ({ session }) => {
     const head = "Quicksand_700Bold"
     const content = "Quicksand_600SemiBold"
 
-    const { CarRegNo, InTime, DayIn, LotName } = session
+    const { CarRegNo, InTime,LotName } = session
+    const timeIn = new Date(InTime)
 
-    const InHour = (InTime.getHours())
-    const InMin = (InTime.getMinutes())
-    const InSec = (InTime.getSeconds())
+    const DayIn = timeIn.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    }).replace(',', '');
+    const InHour = (timeIn.getHours())
+    const InMin = (timeIn.getMinutes())
 
     const [hours, setHours] = useState(0);
     const [minutes, setMinutes] = useState(0);
@@ -93,7 +98,7 @@ const CurrentSession = ({ session }) => {
                             fontSize: 14
                         }}
                         >
-                            {''}{hours ? hours + "h " : minutes ? minutes + "m " : null}{seconds + "s "}
+                            {''}{hours ? hours + "h " + minutes + "m ": minutes ? minutes + "m " : null}{seconds + "s "}
                         </Text>
                     </View>
                 </View>

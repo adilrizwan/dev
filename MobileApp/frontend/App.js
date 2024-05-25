@@ -43,30 +43,11 @@ export default function App() {
         Quicksand_700Bold,
     });
 
-    // const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-    // useDeferredValue(userName)
-    // const { isLoggedIn } = useAuth();
-
-    // React.useEffect(() => {
-    //     (async () => {
-    //         try {
-    //             const credentials = await Keychain.getGenericPassword();
-    //             if (credentials) {
-    //                 setIsLoggedIn(true);
-    //             } else {
-    //                 console.log("No credentials stored");
-    //             }
-    //         } catch (error) {
-    //             console.log("Keychain couldn't be accessed!", error);
-    //         }
-    //     })();
-    // }, []);
-
     // React.useEffect(() => {
     async function deleteToken() {
         await SecureStore.deleteItemAsync("user")
     }
-    // deleteToken();
+    deleteToken();
     // }, [])
 
     const handleLoginSuccess = () => {

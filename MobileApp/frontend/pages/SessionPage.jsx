@@ -14,7 +14,7 @@ const SessionPage = () => {
     const [value, setValue] = React.useState('Active');
     const { token } = useAuth();
 
-    console.log("token:", token)
+    // console.log("token:", token)
 
     const active = { CarRegNo: 'ABC-123', InTime: new Date(), DayIn: '1 Jan 2024', LotName: 'IBA Main Campus' }
     const past = [{ CarRegNo: 'ABC-123', InTime: new Date(), DayIn: '1 Jan 2024', OutTime: new Date(), DayOut: '2 Jan 2024', LotName: 'IBA Main Campus' },
@@ -23,7 +23,7 @@ const SessionPage = () => {
     { CarRegNo: 'XYZ-123', InTime: new Date(), DayIn: '2 Jan 2024', OutTime: new Date(), DayOut: '21 Jan 2024', LotName: 'Lucky One Mall' }
     ]
     const [activeSessions, setActiveSessions] = React.useState([])
-    const [pastSessions, setPastSessions] = React.useState(past)
+    const [pastSessions, setPastSessions] = React.useState([])
 
     const styles = StyleSheet.create({
         container: {
@@ -79,7 +79,7 @@ const SessionPage = () => {
         <>
             <Header Title={"Session History"} />
 
-            <ScrollView>
+            <ScrollView style={{backgroundColor:theme.colors.background}}>
                 <SafeAreaView style={styles.container}>
                     <SegmentedButtons
                         value={value}
@@ -112,9 +112,7 @@ const SessionPage = () => {
                         </View> :
                         activeSessions.map((session, index) => {
                             return (
-                                <TouchableOpacity key={index} >
-                                    <CurrentSession session={session} key={index} />
-                                </TouchableOpacity>
+                                <CurrentSession session={session} key={index} />
                             )
                         })
                     :
