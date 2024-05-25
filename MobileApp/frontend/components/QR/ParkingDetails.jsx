@@ -14,9 +14,11 @@ const ParkingDetails = ({ route, navigation }) => {
     const margin = 10
 
     React.useEffect(() => {
+        console.log("meow")
         const getLotInfo = async () => {
-            api_url = process.env.EXPO_PUBLIC_BACKEND_API_URL + "/parking/get/" + route.params.Lot_ID
-
+            // console.log("lot_id",route.params.lot_id)
+            api_url = process.env.EXPO_PUBLIC_BACKEND_API_URL + "/parking/get/" + route.params.lot_id
+            //console.log("api",api_url)
             try {
                 const payload = await axios.get(api_url, {
                     headers: {
@@ -31,7 +33,7 @@ const ParkingDetails = ({ route, navigation }) => {
                 console.log(err)
             }
         }
-        getLotInfo
+        getLotInfo()
     }, [token])
 
     return (
@@ -69,15 +71,14 @@ const ParkingDetails = ({ route, navigation }) => {
                         Total Capacity: {lotInfo.TotalCapacity}
                     </Text>
 
-                    {/* <View>
-                        {lotInfo.zones.map((zone, index) => {
+                    <View>
+                        {lotInfo ? lotInfo.zones.map((zone, index) => {
                             return (
                                 <View key={index}>
                                     <Text style={{
                                         fontFamily: "Quicksand_400Regular",
                                         fontSize: 18
                                     }}
-                                        key={index}
                                     >
                                         {zone.zoneId}
                                     </Text>
@@ -85,7 +86,6 @@ const ParkingDetails = ({ route, navigation }) => {
                                         fontFamily: "Quicksand_400Regular",
                                         fontSize: 18
                                     }}
-                                        key={index}
                                     >
                                         empty: {zone.emptySpaces}
                                     </Text>
@@ -93,13 +93,12 @@ const ParkingDetails = ({ route, navigation }) => {
                                         fontFamily: "Quicksand_400Regular",
                                         fontSize: 18
                                     }}
-                                        key={index}
                                     >
                                         max: {zone.maxSpaces}
                                     </Text>
                                 </View>)
-                        })}
-                    </View> */}
+                        }) : null}
+                    </View>
                 </View>
 
             </Card>

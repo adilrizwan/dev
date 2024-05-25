@@ -8,6 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SessionPage from '../../pages/SessionPage';
 import QRcodePage from '../../pages/QRcodePage';
+import TransactionPage from '../../pages/TransactionPage';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -104,6 +105,16 @@ const Navbar = () => {
           tabPress: handleTabPress, // Attach tab press listener
         }}
         initialParams={{ key: Date.now() }}
+      />
+      <Tab.Screen
+        name="Transactions"
+        component={TransactionPage}
+        options={{
+          tabBarLabel: 'Transaction',
+          tabBarIcon: ({ color }) => {
+            return <Icon name="history" size={24} color={color} />;
+          },
+        }}
       />
       <Tab.Screen
         name="Profile"

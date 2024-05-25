@@ -23,7 +23,7 @@ const SessionPage = () => {
     { CarRegNo: 'XYZ-123', InTime: new Date(), DayIn: '2 Jan 2024', OutTime: new Date(), DayOut: '21 Jan 2024', LotName: 'Lucky One Mall' }
     ]
     const [activeSessions, setActiveSessions] = React.useState([])
-    const [pastSessions, setPastSessions] = React.useState(past)
+    const [pastSessions, setPastSessions] = React.useState([])
 
     const styles = StyleSheet.create({
         container: {

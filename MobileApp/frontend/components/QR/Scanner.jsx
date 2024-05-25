@@ -11,28 +11,28 @@ const Scanner = ({ navigation }) => {
     const [scanned, setScanned] = React.useState(false);
     const [result, setResult] = React.useState("null");
 
-    const scanHandler = ( {data} ) => {
-        // console.log("scanned",JSON.parse(data).Session)
+    const scanHandler = ({ data }) => {
+        console.log("scanned", JSON.parse(data))
 
-        if (JSON.parse(data).Session === "ENTRY"){
+        if (JSON.parse(data).Session === "ENTRY") {
             setTimeout(() => {
 
-                // console.log("scanner", data.data.Lot_Name)
+                // console.log("scanner", JSON.parse(data))
                 navigation.navigate('SessionStart', {
-                    data : JSON.parse(data),
+                    data: JSON.parse(data),
                 });
             }, 1000);
         }
-        else if(JSON.parse(data).Session == "EXIT"){
+        else if (JSON.parse(data).Session == "EXIT") {
             setTimeout(() => {
 
                 // console.log("scanner", data.data.Lot_Name)
                 navigation.navigate('SessionEnd', {
-                    data : JSON.parse(data),
+                    data: JSON.parse(data),
                 });
             }, 1000);
         }
-        
+
 
     }
 

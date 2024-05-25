@@ -221,9 +221,9 @@ exports.endSession = async (carRegNo, outTime, dayOut) => {
 
     const currentCoins = queryUserCoins.recordset[0].Coins;
 
-    if (currentCoins < charge) {
-      throw new Error("Insufficient coins.");
-    }
+    // if (currentCoins < charge) {
+    //   throw new Error("Insufficient coins.");
+    // }
 
     const newCoins = currentCoins - charge;
 
@@ -407,25 +407,42 @@ exports.getUserTransactionHistory = async (userId) => {
       .request()
       .input("UserID", sql.Int, userId)
       .query(`
-        SELECT 
-          Amount AS TransactionAmount, 
-          TopupDate AS TransactionDate, 
-          'Topup' AS TransactionType 
-        FROM 
-          KioskTopups 
-        WHERE 
-          CarOwnerID = @UserID
-        UNION ALL
-        SELECT 
-          -Charge AS TransactionAmount, 
-          OutTime AS TransactionDate, 
-          'Charge' AS TransactionType 
-        FROM 
-          ParkingSession 
-        WHERE 
-          CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
-        ORDER BY 
-          TransactionDate DESC
+      SELECT MESA.Amount,
+      MESA.Date,
+      MESA.Type,
+      Kiosk.Name AS Name FROM 
+      (SELECT 
+         Amount AS Amount, 
+         TopupDate AS Date, 
+         'Topup' AS Type,
+     KioskID AS ID
+       FROM 
+         KioskTopups 
+       WHERE 
+         CarOwnerID = @UserID ) AS MESA
+
+     left join Kiosk on MESA.ID = Kiosk.KioskID
+
+     union all 
+
+     Select  MESAS.Amount,
+   MESAS.Date,
+   MESAS.Type,
+   Lot.LotName as Name From
+       (SELECT 
+         -Charge AS Amount, 
+         OutTime AS Date, 
+         'Charge' AS Type ,
+     LotID AS ID
+       FROM 
+         ParkingSession 
+       WHERE 
+         CarRegNo IN (SELECT RegistrationNumber FROM Car WHERE OwnerID = @UserID)
+   ) as MESAS
+   left join 
+   Lot on Lot.LotID = MESAS.ID
+       ORDER BY 
+         Date DESC 
       `);
     return query.recordset;
   } catch (error) {
