@@ -1,11 +1,9 @@
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SessionStart from '../components/QR/SessionStart';
 import Scanner from '../components/QR/Scanner';
-import Scanner1 from '../components/QR/Scanner1';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Appbar } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
-import ParkSense from '../components/Overlay/ParkSense';
 import ParkingDetails from '../components/QR/ParkingDetails';
 import SessionEnd from '../components/QR/SessionEnd';
 

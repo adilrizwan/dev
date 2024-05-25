@@ -40,7 +40,7 @@ const TransactionPage = () => {
     const sub = "Quicksand_400Regular"
 
     return (
-        <ScrollView>
+        <ScrollView style={{backgroundColor:theme.colors.background}}>
             <Header Title={"Transaction History"} />
             {
                 transactions.length == 0 ?

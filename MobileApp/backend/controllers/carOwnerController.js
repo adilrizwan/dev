@@ -142,11 +142,11 @@ exports.startParkingSession = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
       const { carRegNo, lotID } = req.body;
-      const inTime = new Date(); 
-      const dayIn = inTime.getDate(); 
-      
+      const inTime = new Date();
+      const dayIn = inTime.getDate();
+
       const userId = req.user.id;
-      
+
       const result = await carOwnerOps.startSession(carRegNo, lotID, inTime, dayIn, userId);
       res.status(201).json({ message: "Parking session started successfully" });
     } catch (error) {
@@ -163,11 +163,11 @@ exports.endParkingSession = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
       const { carRegNo } = req.body;
-      const outTime = new Date(); 
-      const dayOut = outTime.getDate(); 
-      
+      const outTime = new Date();
+      const dayOut = outTime.getDate();
+
       const { rowsAffected, charge } = await carOwnerOps.endSession(carRegNo, outTime, dayOut);
-      
+
       if (rowsAffected > 0) {
         res.json({ message: "Parking session ended successfully", charge });
       } else {
@@ -184,8 +184,8 @@ exports.endParkingSession = async (req, res) => {
 
 
 exports.getCurrentParkingSessions = async (req, res) => {
-  console.log("User object:", req.user); 
-  const userID = req.user.id;   
+  console.log("User object:", req.user);
+  const userID = req.user.id;
   console.log(userID)
   try {
     const currentSessions = await carOwnerOps.getCurrentSessions(userID);
@@ -197,7 +197,7 @@ exports.getCurrentParkingSessions = async (req, res) => {
 };
 
 exports.getPastParkingSessions = async (req, res) => {
-  const userID = req.user.id; 
+  const userID = req.user.id;
   try {
     const pastSessions = await carOwnerOps.getUserPastSessions(userID);
     res.json(pastSessions);
@@ -208,7 +208,7 @@ exports.getPastParkingSessions = async (req, res) => {
 };
 
 exports.getAllParkingSessions = async (req, res) => {
-  const userID = req.user.id; 
+  const userID = req.user.id;
   try {
     const allSessions = await carOwnerOps.getAllSessions(userID);
     res.json(allSessions);
@@ -222,8 +222,8 @@ exports.getRecentParkingLots = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
       const userID = req.user.id;
-      const { limit } = req.body || 5; 
-      
+      const limit = req.body.limit || 5;
+
       const recentParkingLots = await carOwnerOps.getRecentParkingLots(userID, limit);
       res.json(recentParkingLots);
     } catch (error) {
@@ -239,8 +239,8 @@ exports.getFrequentParkingLots = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
       const userID = req.user.id;
-      const limit = req.body.limit || 5; 
-      
+      const limit = req.body.limit || 5;
+
       const frequentParkingLots = await carOwnerOps.getFrequentParkingLots(userID, limit);
       res.json(frequentParkingLots);
     } catch (error) {
@@ -265,7 +265,7 @@ exports.getLotInfo = async (req, res) => {
 exports.getUserCoins = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
-      const userId = req.user.id;  
+      const userId = req.user.id;
       const result = await carOwnerOps.getUserCoins(userId);
       if (result) {
         res.json({ coins: result.Coins });
@@ -284,7 +284,7 @@ exports.getUserCoins = async (req, res) => {
 exports.getUserTransactionHistory = async (req, res) => {
   if (req.user.role === "CAROWNER") {
     try {
-      const userId = req.user.id;  
+      const userId = req.user.id;
       const transactions = await carOwnerOps.getUserTransactionHistory(userId);
       if (transactions.length > 0) {
         res.json({ transactions });

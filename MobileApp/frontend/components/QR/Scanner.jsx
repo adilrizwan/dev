@@ -16,8 +16,6 @@ const Scanner = ({ navigation }) => {
 
         if (JSON.parse(data).Session === "ENTRY") {
             setTimeout(() => {
-
-                // console.log("scanner", JSON.parse(data))
                 navigation.navigate('SessionStart', {
                     data: JSON.parse(data),
                 });
@@ -25,8 +23,6 @@ const Scanner = ({ navigation }) => {
         }
         else if (JSON.parse(data).Session == "EXIT") {
             setTimeout(() => {
-
-                // console.log("scanner", data.data.Lot_Name)
                 navigation.navigate('SessionEnd', {
                     data: JSON.parse(data),
                 });
@@ -135,12 +131,6 @@ const Scanner = ({ navigation }) => {
                     <View style={styles.barcodeGuideline} />
 
                 </View>
-                {/* <View style={styles.container1}> */}
-                {/* <View style={styles.topLeft} /> */}
-                {/* <View style={styles.topRight} /> */}
-                {/* <View style={styles.bottomRight} /> */}
-                {/* <View style={styles.bottomLeft} /> */}
-                {/* </View> */}
             </CameraView>
         </View>
     )

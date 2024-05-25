@@ -22,7 +22,7 @@ const SessionStart = ({ route, navigation }) => {
     React.useEffect(() => {
         const getVehicles = async () => {
             api_url = process.env.EXPO_PUBLIC_BACKEND_API_URL + "/car";
-            console.log("api1", api_url)
+            // console.log("api1", api_url)
             try {
                 const payload = await axios.get(api_url, {
                     headers: {

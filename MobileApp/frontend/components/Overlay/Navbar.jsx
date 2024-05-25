@@ -71,7 +71,7 @@ const Navbar = () => {
       )}
     >
       <Tab.Screen
-        name="Home"
+        name="HomePage"
         component={HomePage}
         options={{
           tabBarLabel: 'Home',

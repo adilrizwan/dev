@@ -79,7 +79,7 @@ const SessionPage = () => {
         <>
             <Header Title={"Session History"} />
 
-            <ScrollView>
+            <ScrollView style={{backgroundColor:theme.colors.background}}>
                 <SafeAreaView style={styles.container}>
                     <SegmentedButtons
                         value={value}
